@@ -123,9 +123,9 @@
 .terminal-window {
   position: absolute;
   width: 720px;
-  max-width: calc(100vw - 40px);
-  min-height: 420px;
-  max-height: calc(100vh - 120px);
+  max-width: calc(100% - 40px);
+  min-height: 300px;
+  max-height: calc(100% - 20px);
   background: var(--window-bg);
   border-radius: 10px;
   box-shadow:
@@ -448,8 +448,8 @@
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .terminal-window {
-    width: calc(100vw - 20px);
-    min-height: 300px;
+    width: calc(100% - 20px);
+    min-height: 250px;
   }
 
   .dock-icon {
