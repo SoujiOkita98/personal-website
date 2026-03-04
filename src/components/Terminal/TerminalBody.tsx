@@ -44,6 +44,13 @@ export default function TerminalBody() {
   }, []);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Stop ESC from bubbling to the window (prevents zoom-out while typing)
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      inputRef.current?.blur();
+      return;
+    }
+
     if (e.key === 'Enter') {
       const cmd = input.trim();
 
@@ -97,8 +104,13 @@ export default function TerminalBody() {
     }
   };
 
+  // Prevent wheel events from escaping the terminal into the 3D scene
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="terminal-body" ref={bodyRef} onClick={focusInput}>
+    <div className="terminal-body" ref={bodyRef} onClick={focusInput} onWheel={handleWheel}>
       {showWelcome && (
         <div className="terminal-output welcome-text">
           <pre>{WELCOME}</pre>
