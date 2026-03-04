@@ -7,7 +7,12 @@ interface HistoryEntry {
 }
 
 const WELCOME = `Welcome to guanjiazhu's terminal.
-Type 'help' to see available commands.`;
+Type 'help' to see available commands.
+
+MacBook model by jackbaeten (sketchfab.com/jackbaeten) - CC BY
+3D scene inspired by Henry Heffernan's brilliant Three.js portfolio.
+Henry, if you're reading this — thank you for open-sourcing your project.
+I learned so much from studying your code. Truly clever work.`;
 
 const PROMPT = 'guanjiazhu@web ~ % ';
 
