@@ -24,17 +24,23 @@ export default function TerminalBody() {
   const [showWelcome, setShowWelcome] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const focusScrollTimerRef = useRef<number | null>(null);
 
-  // Auto-scroll to bottom
-  useEffect(() => {
+  const scrollToBottom = () => {
     if (bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
     }
-  }, [history]);
+  };
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    scrollToBottom();
+  }, [history, showWelcome]);
 
   // Focus input on click
   const focusInput = () => {
     inputRef.current?.focus();
+    window.requestAnimationFrame(scrollToBottom);
   };
 
   // Auto-focus on mount
@@ -42,6 +48,26 @@ export default function TerminalBody() {
     const timer = setTimeout(() => inputRef.current?.focus(), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (focusScrollTimerRef.current !== null) {
+        window.clearTimeout(focusScrollTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleInputFocus = () => {
+    if (focusScrollTimerRef.current !== null) {
+      window.clearTimeout(focusScrollTimerRef.current);
+    }
+
+    // Wait for mobile keyboard animation, then keep prompt line visible.
+    focusScrollTimerRef.current = window.setTimeout(() => {
+      scrollToBottom();
+      focusScrollTimerRef.current = null;
+    }, 180);
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     // Stop ESC from bubbling to the window (prevents zoom-out while typing)
@@ -142,6 +168,7 @@ export default function TerminalBody() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={handleInputFocus}
           spellCheck={false}
           autoComplete="off"
           autoCapitalize="off"

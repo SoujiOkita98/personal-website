@@ -365,11 +365,10 @@
 /* ===== DOCK ===== */
 .dock-container {
   position: absolute;
-  bottom: calc(4px + var(--keyboard-inset, 0px));
+  bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
-  transition: bottom 0.2s ease;
 }
 
 .dock {
@@ -483,10 +482,10 @@
     left: 0 !important;
     top: 0 !important;
     right: 0 !important;
-    bottom: auto !important;
+    bottom: 0 !important;
     width: 100% !important;
-    height: calc(100% - var(--keyboard-inset, 0px)) !important;
-    max-height: calc(100% - var(--keyboard-inset, 0px)) !important;
+    height: 100% !important;
+    max-height: 100% !important;
     transform: none !important;
     border-radius: 0;
   }

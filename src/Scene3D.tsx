@@ -127,64 +127,32 @@ export default function Scene3D() {
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null)
   const screenPortalRef = useRef<HTMLDivElement>(null)
 
-  // Keep CSS in sync with the visual viewport, especially during keyboard open/close.
+  // Keep camera framing adaptive to viewport shape, but ignore keyboard-only viewport changes.
   useEffect(() => {
-    const root = document.documentElement
-    const updateViewportVars = () => {
+    const updateFov = () => {
       const vv = window.visualViewport
-      const width = vv ? vv.width : window.innerWidth
-      const height = vv ? vv.height : window.innerHeight
-      const offsetTop = vv ? vv.offsetTop : 0
-      const offsetLeft = vv ? vv.offsetLeft : 0
-      const keyboardInset = vv
-        ? Math.max(0, window.innerHeight - (vv.height + vv.offsetTop))
-        : 0
+      const keyboardInset = vv ? Math.max(0, window.innerHeight - (vv.height + vv.offsetTop)) : 0
+      if (keyboardInset > 80) return
 
-      root.style.setProperty('--visual-viewport-width', `${Math.round(width)}px`)
-      root.style.setProperty('--visual-viewport-height', `${Math.round(height)}px`)
-      root.style.setProperty('--visual-viewport-offset-top', `${Math.round(offsetTop)}px`)
-      root.style.setProperty('--visual-viewport-offset-left', `${Math.round(offsetLeft)}px`)
-      root.style.setProperty('--keyboard-inset', `${Math.round(keyboardInset)}px`)
-
+      const width = window.innerWidth
+      const height = window.innerHeight
       const nextFov = getAdaptiveFov(width / Math.max(height, 1))
       setAdaptiveFov((prev) => (Math.abs(prev - nextFov) < 0.01 ? prev : nextFov))
     }
 
-    const onViewportChange = () => {
-      window.requestAnimationFrame(updateViewportVars)
-    }
+    const onViewportChange = () => window.requestAnimationFrame(updateFov)
 
-    updateViewportVars()
+    updateFov()
 
     const viewport = window.visualViewport
     window.addEventListener('resize', onViewportChange)
     window.addEventListener('orientationchange', onViewportChange)
     viewport?.addEventListener('resize', onViewportChange)
-    viewport?.addEventListener('scroll', onViewportChange)
 
     return () => {
       window.removeEventListener('resize', onViewportChange)
       window.removeEventListener('orientationchange', onViewportChange)
       viewport?.removeEventListener('resize', onViewportChange)
-      viewport?.removeEventListener('scroll', onViewportChange)
-    }
-  }, [])
-
-  // Prevent browser pinch-zoom so scene scale always comes from Three.js camera math.
-  useEffect(() => {
-    const preventMultiTouchZoom = (event: TouchEvent) => {
-      if (event.touches.length > 1) event.preventDefault()
-    }
-    const preventCtrlWheelZoom = (event: WheelEvent) => {
-      if (event.ctrlKey) event.preventDefault()
-    }
-
-    document.addEventListener('touchmove', preventMultiTouchZoom, { passive: false })
-    window.addEventListener('wheel', preventCtrlWheelZoom, { passive: false })
-
-    return () => {
-      document.removeEventListener('touchmove', preventMultiTouchZoom)
-      window.removeEventListener('wheel', preventCtrlWheelZoom)
     }
   }, [])
 
