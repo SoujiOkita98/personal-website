@@ -6,7 +6,7 @@ import MacBookModel from './components/MacBookModel'
 import StudioEnvironment from './components/StudioEnvironment'
 import DeskSetup from './components/DeskSetup'
 import PlantModel from './components/PlantModel'
-import { CoffeeMug, MousePad, Mouse, Notebook, BookStack } from './components/DeskProps'
+import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
 import './scene.css'
 
 // MacBook position relative to desk group
@@ -220,10 +220,8 @@ export default function Scene3D() {
           />
           <PlantModel position={[0.6, 0.74, -0.15]} />
           <CoffeeMug position={[-0.55, 0.74, 0.1]} />
-          <MousePad position={[0.35, 0.742, 0.18]} />
-          <Mouse position={[0.38, 0.742, 0.15]} />
-          <Notebook position={[-0.35, 0.742, 0.2]} rotation={[0, 0.15, 0]} />
           <BookStack position={[0.65, 0.742, 0.15]} />
+          <StationWagon position={[-0.55, 0.742, -0.15]} />
         </group>
 
         <OrbitControls

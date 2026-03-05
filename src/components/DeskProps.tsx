@@ -132,6 +132,145 @@ export function Notebook({
   )
 }
 
+/* ===== STATION WAGON MODEL CAR ===== */
+export function StationWagon({ position }: { position: [number, number, number] }) {
+  const bodyColor = '#f0ece6'
+  const trimColor = '#c0c0c0'
+  const windowColor = '#87afc7'
+  const tireColor = '#1a1a1a'
+  const hubColor = '#d0d0d0'
+
+  return (
+    <group position={position} rotation={[0, -0.4, 0]}>
+      {/* Lower body */}
+      <mesh position={[0, 0.018, 0]} castShadow>
+        <boxGeometry args={[0.12, 0.02, 0.045]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.35} metalness={0.15} />
+      </mesh>
+
+      {/* Upper cabin - wagon style (long flat roof) */}
+      <mesh position={[-0.005, 0.038, 0]} castShadow>
+        <boxGeometry args={[0.09, 0.02, 0.04]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.35} metalness={0.15} />
+      </mesh>
+
+      {/* Windshield (angled front) */}
+      <mesh position={[0.04, 0.035, 0]} rotation={[0, 0, 0.35]} castShadow>
+        <boxGeometry args={[0.022, 0.002, 0.036]} />
+        <meshStandardMaterial color={windowColor} roughness={0.1} metalness={0.3} transparent opacity={0.7} />
+      </mesh>
+
+      {/* Side windows left */}
+      <mesh position={[-0.005, 0.038, 0.0205]}>
+        <boxGeometry args={[0.07, 0.014, 0.001]} />
+        <meshStandardMaterial color={windowColor} roughness={0.1} metalness={0.3} transparent opacity={0.7} />
+      </mesh>
+
+      {/* Side windows right */}
+      <mesh position={[-0.005, 0.038, -0.0205]}>
+        <boxGeometry args={[0.07, 0.014, 0.001]} />
+        <meshStandardMaterial color={windowColor} roughness={0.1} metalness={0.3} transparent opacity={0.7} />
+      </mesh>
+
+      {/* Rear window */}
+      <mesh position={[-0.05, 0.035, 0]} rotation={[0, 0, -0.2]}>
+        <boxGeometry args={[0.002, 0.016, 0.036]} />
+        <meshStandardMaterial color={windowColor} roughness={0.1} metalness={0.3} transparent opacity={0.7} />
+      </mesh>
+
+      {/* Front bumper */}
+      <mesh position={[0.062, 0.012, 0]}>
+        <boxGeometry args={[0.005, 0.01, 0.046]} />
+        <meshStandardMaterial color={trimColor} roughness={0.3} metalness={0.4} />
+      </mesh>
+
+      {/* Rear bumper */}
+      <mesh position={[-0.062, 0.012, 0]}>
+        <boxGeometry args={[0.005, 0.01, 0.046]} />
+        <meshStandardMaterial color={trimColor} roughness={0.3} metalness={0.4} />
+      </mesh>
+
+      {/* Headlights */}
+      <mesh position={[0.061, 0.02, 0.016]}>
+        <sphereGeometry args={[0.004, 8, 8]} />
+        <meshStandardMaterial color="#fffde0" emissive="#fffde0" emissiveIntensity={0.2} roughness={0.2} />
+      </mesh>
+      <mesh position={[0.061, 0.02, -0.016]}>
+        <sphereGeometry args={[0.004, 8, 8]} />
+        <meshStandardMaterial color="#fffde0" emissive="#fffde0" emissiveIntensity={0.2} roughness={0.2} />
+      </mesh>
+
+      {/* Taillights */}
+      <mesh position={[-0.061, 0.02, 0.016]}>
+        <boxGeometry args={[0.003, 0.006, 0.008]} />
+        <meshStandardMaterial color="#cc3333" emissive="#cc3333" emissiveIntensity={0.15} roughness={0.3} />
+      </mesh>
+      <mesh position={[-0.061, 0.02, -0.016]}>
+        <boxGeometry args={[0.003, 0.006, 0.008]} />
+        <meshStandardMaterial color="#cc3333" emissive="#cc3333" emissiveIntensity={0.15} roughness={0.3} />
+      </mesh>
+
+      {/* Wheels - front left */}
+      <group position={[0.035, 0.008, 0.025]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.009, 0.009, 0.006, 12]} />
+          <meshStandardMaterial color={tireColor} roughness={0.9} />
+        </mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.006, 0.006, 0.007, 8]} />
+          <meshStandardMaterial color={hubColor} roughness={0.2} metalness={0.6} />
+        </mesh>
+      </group>
+
+      {/* Wheels - front right */}
+      <group position={[0.035, 0.008, -0.025]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.009, 0.009, 0.006, 12]} />
+          <meshStandardMaterial color={tireColor} roughness={0.9} />
+        </mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.006, 0.006, 0.007, 8]} />
+          <meshStandardMaterial color={hubColor} roughness={0.2} metalness={0.6} />
+        </mesh>
+      </group>
+
+      {/* Wheels - rear left */}
+      <group position={[-0.035, 0.008, 0.025]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.009, 0.009, 0.006, 12]} />
+          <meshStandardMaterial color={tireColor} roughness={0.9} />
+        </mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.006, 0.006, 0.007, 8]} />
+          <meshStandardMaterial color={hubColor} roughness={0.2} metalness={0.6} />
+        </mesh>
+      </group>
+
+      {/* Wheels - rear right */}
+      <group position={[-0.035, 0.008, -0.025]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.009, 0.009, 0.006, 12]} />
+          <meshStandardMaterial color={tireColor} roughness={0.9} />
+        </mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.006, 0.006, 0.007, 8]} />
+          <meshStandardMaterial color={hubColor} roughness={0.2} metalness={0.6} />
+        </mesh>
+      </group>
+
+      {/* Roof rack rails */}
+      <mesh position={[0, 0.05, 0.018]}>
+        <boxGeometry args={[0.07, 0.002, 0.002]} />
+        <meshStandardMaterial color={trimColor} roughness={0.3} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.05, -0.018]}>
+        <boxGeometry args={[0.07, 0.002, 0.002]} />
+        <meshStandardMaterial color={trimColor} roughness={0.3} metalness={0.5} />
+      </mesh>
+    </group>
+  )
+}
+
 /* ===== BOOK STACK ===== */
 export function BookStack({ position }: { position: [number, number, number] }) {
   const books = [
