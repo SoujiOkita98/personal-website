@@ -137,12 +137,15 @@ export default function TerminalBody() {
           ref={inputRef}
           className="terminal-input"
           type="text"
+          inputMode="text"
+          enterKeyHint="send"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           spellCheck={false}
           autoComplete="off"
           autoCapitalize="off"
+          autoCorrect="off"
         />
       </div>
     </div>

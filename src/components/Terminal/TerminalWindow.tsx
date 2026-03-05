@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, type MouseEvent, type ReactNode } from 'react';
+import { useState, useRef, useCallback, type PointerEvent, type ReactNode } from 'react';
 
 interface TerminalWindowProps {
   children: ReactNode;
@@ -21,7 +21,7 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
   const windowRef = useRef<HTMLDivElement>(null);
 
   // ── Title bar drag (move) ──
-  const handleMouseDown = useCallback((e: MouseEvent) => {
+  const handlePointerDown = useCallback((e: PointerEvent) => {
     if ((e.target as HTMLElement).closest('.traffic-lights')) return;
     if (fullscreen) return;
 
@@ -46,7 +46,7 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
       startPosY,
     };
 
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
+    const handlePointerMove = (e: globalThis.PointerEvent) => {
       if (!dragRef.current) return;
       const dx = e.clientX - dragRef.current.startX;
       const dy = e.clientY - dragRef.current.startY;
@@ -56,18 +56,18 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
       });
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       dragRef.current = null;
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
   }, [position, centered, fullscreen]);
 
   // ── Edge / corner resize ──
-  const handleResizeStart = useCallback((e: MouseEvent, dir: ResizeDir) => {
+  const handleResizeStart = useCallback((e: PointerEvent, dir: ResizeDir) => {
     e.preventDefault();
     e.stopPropagation();
     if (fullscreen) return;
@@ -96,7 +96,7 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
     const startPosX = posX;
     const startPosY = posY;
 
-    const onMove = (ev: globalThis.MouseEvent) => {
+    const onMove = (ev: globalThis.PointerEvent) => {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
 
@@ -125,12 +125,12 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
     };
 
     const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
     };
 
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   }, [position, centered, fullscreen]);
 
   const handleFullscreen = () => {
@@ -162,20 +162,20 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
       {/* Resize handles — edges */}
       {!fullscreen && (
         <>
-          <div className="resize-handle resize-n" onMouseDown={(e) => handleResizeStart(e, 'n')} />
-          <div className="resize-handle resize-s" onMouseDown={(e) => handleResizeStart(e, 's')} />
-          <div className="resize-handle resize-e" onMouseDown={(e) => handleResizeStart(e, 'e')} />
-          <div className="resize-handle resize-w" onMouseDown={(e) => handleResizeStart(e, 'w')} />
+          <div className="resize-handle resize-n" onPointerDown={(e) => handleResizeStart(e, 'n')} />
+          <div className="resize-handle resize-s" onPointerDown={(e) => handleResizeStart(e, 's')} />
+          <div className="resize-handle resize-e" onPointerDown={(e) => handleResizeStart(e, 'e')} />
+          <div className="resize-handle resize-w" onPointerDown={(e) => handleResizeStart(e, 'w')} />
           {/* Corners */}
-          <div className="resize-handle resize-ne" onMouseDown={(e) => handleResizeStart(e, 'ne')} />
-          <div className="resize-handle resize-nw" onMouseDown={(e) => handleResizeStart(e, 'nw')} />
-          <div className="resize-handle resize-se" onMouseDown={(e) => handleResizeStart(e, 'se')} />
-          <div className="resize-handle resize-sw" onMouseDown={(e) => handleResizeStart(e, 'sw')} />
+          <div className="resize-handle resize-ne" onPointerDown={(e) => handleResizeStart(e, 'ne')} />
+          <div className="resize-handle resize-nw" onPointerDown={(e) => handleResizeStart(e, 'nw')} />
+          <div className="resize-handle resize-se" onPointerDown={(e) => handleResizeStart(e, 'se')} />
+          <div className="resize-handle resize-sw" onPointerDown={(e) => handleResizeStart(e, 'sw')} />
         </>
       )}
 
       <div className="terminal-inner">
-        <div className="terminal-title-bar" onMouseDown={handleMouseDown}>
+        <div className="terminal-title-bar" onPointerDown={handlePointerDown}>
           <div className="traffic-lights">
             <div className="traffic-light red" onClick={onClose} />
             <div className="traffic-light yellow" onClick={onMinimize} />

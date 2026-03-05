@@ -19,6 +19,8 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  /* Ensure portal layer receives touch events when canvas is pointer-events:none */
+  pointer-events: auto;
 }
 
 /* ===== VIGNETTE OVERLAY ===== */

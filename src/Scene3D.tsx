@@ -161,7 +161,7 @@ export default function Scene3D() {
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 1, pointerEvents: phase === 'focused' ? 'none' : 'auto' }}
       >
         {/* Lighting */}
         <ambientLight intensity={0.4} color="#ffffff" />
