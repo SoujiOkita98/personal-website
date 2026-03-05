@@ -18,6 +18,24 @@ const SCREEN_TARGET: [number, number, number] = [0, 0.98, -1.92]
 // Starting camera position (must match Canvas camera prop)
 const INITIAL_CAM_POS: [number, number, number] = [2.0, 1.8, 1.0]
 const ORBIT_TARGET: [number, number, number] = [0, 0.9, -1.4]
+const BASE_FOV = 45
+const BASE_FOV_ASPECT = 16 / 10
+const MIN_FOV = 42
+const MAX_FOV = 58
+const FOV_BLEND = 0.25
+
+function getAdaptiveFov(aspect: number) {
+  if (aspect <= 0) return BASE_FOV
+
+  // Keep framing stable on narrow viewports by partially preserving horizontal FOV.
+  const baseVerticalRadians = (BASE_FOV * Math.PI) / 180
+  const baseHorizontalRadians = 2 * Math.atan(Math.tan(baseVerticalRadians / 2) * BASE_FOV_ASPECT)
+  const preservedHorizontalVerticalRadians = 2 * Math.atan(Math.tan(baseHorizontalRadians / 2) / aspect)
+  const preservedHorizontalVerticalDegrees = (preservedHorizontalVerticalRadians * 180) / Math.PI
+  const blended = BASE_FOV + (preservedHorizontalVerticalDegrees - BASE_FOV) * FOV_BLEND
+
+  return Math.min(MAX_FOV, Math.max(MIN_FOV, blended))
+}
 
 function CameraAnimator({
   controlsRef,
@@ -105,8 +123,70 @@ function CameraAnimator({
 
 export default function Scene3D() {
   const [phase, setPhase] = useState<'explore' | 'zooming' | 'focused'>('explore')
+  const [adaptiveFov, setAdaptiveFov] = useState(BASE_FOV)
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null)
   const screenPortalRef = useRef<HTMLDivElement>(null)
+
+  // Keep CSS in sync with the visual viewport, especially during keyboard open/close.
+  useEffect(() => {
+    const root = document.documentElement
+    const updateViewportVars = () => {
+      const vv = window.visualViewport
+      const width = vv ? vv.width : window.innerWidth
+      const height = vv ? vv.height : window.innerHeight
+      const offsetTop = vv ? vv.offsetTop : 0
+      const offsetLeft = vv ? vv.offsetLeft : 0
+      const keyboardInset = vv
+        ? Math.max(0, window.innerHeight - (vv.height + vv.offsetTop))
+        : 0
+
+      root.style.setProperty('--visual-viewport-width', `${Math.round(width)}px`)
+      root.style.setProperty('--visual-viewport-height', `${Math.round(height)}px`)
+      root.style.setProperty('--visual-viewport-offset-top', `${Math.round(offsetTop)}px`)
+      root.style.setProperty('--visual-viewport-offset-left', `${Math.round(offsetLeft)}px`)
+      root.style.setProperty('--keyboard-inset', `${Math.round(keyboardInset)}px`)
+
+      const nextFov = getAdaptiveFov(width / Math.max(height, 1))
+      setAdaptiveFov((prev) => (Math.abs(prev - nextFov) < 0.01 ? prev : nextFov))
+    }
+
+    const onViewportChange = () => {
+      window.requestAnimationFrame(updateViewportVars)
+    }
+
+    updateViewportVars()
+
+    const viewport = window.visualViewport
+    window.addEventListener('resize', onViewportChange)
+    window.addEventListener('orientationchange', onViewportChange)
+    viewport?.addEventListener('resize', onViewportChange)
+    viewport?.addEventListener('scroll', onViewportChange)
+
+    return () => {
+      window.removeEventListener('resize', onViewportChange)
+      window.removeEventListener('orientationchange', onViewportChange)
+      viewport?.removeEventListener('resize', onViewportChange)
+      viewport?.removeEventListener('scroll', onViewportChange)
+    }
+  }, [])
+
+  // Prevent browser pinch-zoom so scene scale always comes from Three.js camera math.
+  useEffect(() => {
+    const preventMultiTouchZoom = (event: TouchEvent) => {
+      if (event.touches.length > 1) event.preventDefault()
+    }
+    const preventCtrlWheelZoom = (event: WheelEvent) => {
+      if (event.ctrlKey) event.preventDefault()
+    }
+
+    document.addEventListener('touchmove', preventMultiTouchZoom, { passive: false })
+    window.addEventListener('wheel', preventCtrlWheelZoom, { passive: false })
+
+    return () => {
+      document.removeEventListener('touchmove', preventMultiTouchZoom)
+      window.removeEventListener('wheel', preventCtrlWheelZoom)
+    }
+  }, [])
 
   const handleEnter = () => {
     if (phase !== 'explore') return
@@ -154,7 +234,7 @@ export default function Scene3D() {
       />
 
       <Canvas
-        camera={{ fov: 45, near: 0.01, far: 100, position: [2.0, 1.8, 1.0] }}
+        camera={{ fov: adaptiveFov, near: 0.01, far: 100, position: [2.0, 1.8, 1.0] }}
         dpr={[1, 2]}
         shadows
         gl={{ antialias: true, alpha: true }}
