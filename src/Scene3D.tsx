@@ -6,7 +6,7 @@ import MacBookModel from './components/MacBookModel'
 import StudioEnvironment from './components/StudioEnvironment'
 import DeskSetup from './components/DeskSetup'
 import PlantModel from './components/PlantModel'
-import { CoffeeMug, MousePad, Mouse, Notebook, BookStack } from './components/DeskProps'
+import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
 import './scene.css'
 
 // MacBook position relative to desk group
@@ -20,9 +20,11 @@ const INITIAL_CAM_POS: [number, number, number] = [2.0, 1.8, 1.0]
 const ORBIT_TARGET: [number, number, number] = [0, 0.9, -1.4]
 
 function CameraAnimator({
+  controlsRef,
   onZoomIn,
   onZoomOut,
 }: {
+  controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>
   onZoomIn: () => void
   onZoomOut: () => void
 }) {
@@ -32,6 +34,9 @@ function CameraAnimator({
   const zoomIn = useCallback(() => {
     if (hasRun.current) return
     hasRun.current = true
+
+    // Disable controls during animation so they don't fight gsap
+    if (controlsRef.current) controlsRef.current.enabled = false
 
     gsap.to(camera.position, {
       x: SCREEN_TARGET[0],
@@ -46,14 +51,21 @@ function CameraAnimator({
       onComplete: () => {
         camera.lookAt(SCREEN_TARGET[0], SCREEN_TARGET[1], SCREEN_TARGET[2])
         camera.updateProjectionMatrix()
+        // Re-enable controls with new target centered on screen
+        if (controlsRef.current) {
+          controlsRef.current.target.set(SCREEN_TARGET[0], SCREEN_TARGET[1], SCREEN_TARGET[2])
+          controlsRef.current.enabled = true
+        }
         onZoomIn()
       },
     })
-  }, [camera, onZoomIn])
+  }, [camera, controlsRef, onZoomIn])
 
   const zoomOut = useCallback(() => {
     if (!hasRun.current) return
     hasRun.current = false
+
+    if (controlsRef.current) controlsRef.current.enabled = false
 
     gsap.to(camera.position, {
       x: INITIAL_CAM_POS[0],
@@ -68,10 +80,15 @@ function CameraAnimator({
       onComplete: () => {
         camera.lookAt(ORBIT_TARGET[0], ORBIT_TARGET[1], ORBIT_TARGET[2])
         camera.updateProjectionMatrix()
+        // Restore original orbit target
+        if (controlsRef.current) {
+          controlsRef.current.target.set(ORBIT_TARGET[0], ORBIT_TARGET[1], ORBIT_TARGET[2])
+          controlsRef.current.enabled = true
+        }
         onZoomOut()
       },
     })
-  }, [camera, onZoomOut])
+  }, [camera, controlsRef, onZoomOut])
 
   useEffect(() => {
     const w = window as unknown as Record<string, unknown>
@@ -95,10 +112,6 @@ export default function Scene3D() {
     if (phase !== 'explore') return
     setPhase('zooming')
 
-    if (controlsRef.current) {
-      controlsRef.current.enabled = false
-    }
-
     const zoom = (window as unknown as Record<string, () => void>).__zoomToScreen
     if (zoom) zoom()
   }
@@ -117,9 +130,6 @@ export default function Scene3D() {
 
   const handleZoomOutComplete = useCallback(() => {
     setPhase('explore')
-    if (controlsRef.current) {
-      controlsRef.current.enabled = true
-    }
   }, [])
 
   // ESC key listener
@@ -131,8 +141,6 @@ export default function Scene3D() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [handleExit])
 
-  const isFocused = phase === 'focused'
-
   return (
     <div className="scene-container">
       {/* ── Screen portal layer ──
@@ -143,7 +151,6 @@ export default function Scene3D() {
       <div
         ref={screenPortalRef}
         className="screen-portal"
-        style={{ pointerEvents: isFocused ? 'auto' : 'none' }}
       />
 
       <Canvas
@@ -154,10 +161,7 @@ export default function Scene3D() {
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}
-        style={{
-          pointerEvents: isFocused ? 'none' : 'auto',
-          zIndex: 1,
-        }}
+        style={{ zIndex: 1 }}
       >
         {/* Lighting */}
         <ambientLight intensity={0.4} color="#ffffff" />
@@ -216,10 +220,8 @@ export default function Scene3D() {
           />
           <PlantModel position={[0.6, 0.74, -0.15]} />
           <CoffeeMug position={[-0.55, 0.74, 0.1]} />
-          <MousePad position={[0.35, 0.742, 0.18]} />
-          <Mouse position={[0.38, 0.742, 0.15]} />
-          <Notebook position={[-0.35, 0.742, 0.2]} rotation={[0, 0.15, 0]} />
           <BookStack position={[0.65, 0.742, 0.15]} />
+          <StationWagon position={[-0.55, 0.742, -0.15]} />
         </group>
 
         <OrbitControls
@@ -227,27 +229,39 @@ export default function Scene3D() {
           target={[0, 0.9, -1.4]}
           enablePan={false}
           enableZoom={true}
-          enabled={!isFocused}
-          minDistance={1.2}
-          maxDistance={4.0}
-          minPolarAngle={Math.PI * 0.15}
+          minDistance={0.3}
+          maxDistance={5.0}
+          minPolarAngle={Math.PI * 0.05}
           maxPolarAngle={Math.PI * 0.48}
-          minAzimuthAngle={-Math.PI * 0.5}
-          maxAzimuthAngle={Math.PI * 0.5}
           enableDamping
           dampingFactor={0.05}
         />
 
-        <CameraAnimator onZoomIn={handleZoomInComplete} onZoomOut={handleZoomOutComplete} />
+        <CameraAnimator
+          controlsRef={controlsRef}
+          onZoomIn={handleZoomInComplete}
+          onZoomOut={handleZoomOutComplete}
+        />
       </Canvas>
 
       {/* Enter button */}
-      {(phase === 'explore' || phase === 'zooming') && (
-        <button
-          className={`enter-button${phase === 'zooming' ? ' fade-out' : ''}`}
-          onClick={handleEnter}
-        >
+      {phase === 'explore' && (
+        <button className="enter-button" onClick={handleEnter}>
           Enter
+        </button>
+      )}
+
+      {/* Fade out during zoom */}
+      {phase === 'zooming' && (
+        <button className="enter-button fade-out">
+          Enter
+        </button>
+      )}
+
+      {/* Back button — return to starting view */}
+      {phase === 'focused' && (
+        <button className="back-button" onClick={handleExit}>
+          ← Back
         </button>
       )}
 
