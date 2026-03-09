@@ -23,6 +23,10 @@ const BASE_FOV_ASPECT = 16 / 10
 const MIN_FOV = 42
 const MAX_FOV = 58
 const FOV_BLEND = 0.25
+const BASE_SCREEN_FOCUS_DISTANCE = 0.8
+const MOBILE_SCREEN_FOCUS_DISTANCE = 0.92
+const MOBILE_SCREEN_MAX_WIDTH = 768
+const MOBILE_PORTRAIT_ASPECT = 0.85
 
 function getAdaptiveFov(aspect: number) {
   if (aspect <= 0) return BASE_FOV
@@ -35,6 +39,16 @@ function getAdaptiveFov(aspect: number) {
   const blended = BASE_FOV + (preservedHorizontalVerticalDegrees - BASE_FOV) * FOV_BLEND
 
   return Math.min(MAX_FOV, Math.max(MIN_FOV, blended))
+}
+
+function getScreenFocusDistance(width: number, height: number) {
+  const aspect = width / Math.max(height, 1)
+
+  if (width <= MOBILE_SCREEN_MAX_WIDTH && aspect <= MOBILE_PORTRAIT_ASPECT) {
+    return MOBILE_SCREEN_FOCUS_DISTANCE
+  }
+
+  return BASE_SCREEN_FOCUS_DISTANCE
 }
 
 function CameraAnimator({
@@ -52,6 +66,7 @@ function CameraAnimator({
   const zoomIn = useCallback(() => {
     if (hasRun.current) return
     hasRun.current = true
+    const focusDistance = getScreenFocusDistance(window.innerWidth, window.innerHeight)
 
     // Disable controls during animation so they don't fight gsap
     if (controlsRef.current) controlsRef.current.enabled = false
@@ -59,7 +74,7 @@ function CameraAnimator({
     gsap.to(camera.position, {
       x: SCREEN_TARGET[0],
       y: SCREEN_TARGET[1],
-      z: SCREEN_TARGET[2] + 0.8,
+      z: SCREEN_TARGET[2] + focusDistance,
       duration: 2.5,
       ease: 'power2.inOut',
       onUpdate: () => {

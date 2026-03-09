@@ -14,6 +14,7 @@ const COMMANDS: Record<string, () => CommandOutput> = {
   skills      What I know
   projects    Things I'm building
   contact     How to reach me
+  credits     Acknowledgments
   neofetch    System info
   clear       Clear the terminal
   exit        Exit terminal
@@ -103,6 +104,18 @@ Check back later — cool stuff in the works.`,
   GitHub       github.com/SoujiOkita98
 
 Feel free to reach out — always down to chat.`,
+  }),
+
+  credits: () => ({
+    text: `Acknowledgments:
+
+  MacBook model by jackbaeten
+  sketchfab.com/jackbaeten
+  Licensed under CC BY
+
+  3D scene inspired by Henry Heffernan's Three.js portfolio.
+  Henry, thank you for open-sourcing your project.
+  I learned a lot from studying your code.`,
   }),
 
   neofetch: () => ({

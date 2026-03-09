@@ -347,6 +347,12 @@
   color: var(--terminal-accent);
 }
 
+@media (pointer: coarse) {
+  .terminal-body {
+    font-size: 16px;
+  }
+}
+
 /* ===== CURSOR BLINK ===== */
 @keyframes blink {
   0%, 50% { opacity: 1; }
@@ -474,4 +480,3 @@
   0%, 50% { border-color: var(--terminal-prompt); }
   51%, 100% { border-color: transparent; }
 }
-
