@@ -7,10 +7,142 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <title>Guanjiazhu</title>
+    <title>Gavin Zhu (Guanjia Zhu) | Personal Website</title>
+    <meta
+      name="description"
+      content="Personal website of Gavin Zhu, also known as Guanjia Zhu. Investor at Llama Ventures with experience across AI, startups, finance, and product building."
+    />
+    <meta name="author" content="Gavin Zhu" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://gavinzhu.com/" />
+    <link rel="me" href="https://github.com/SoujiOkita98" />
+    <link rel="me" href="https://www.linkedin.com/in/guanjiazhu/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gavinzhu.com/" />
+    <meta property="og:site_name" content="Gavin Zhu" />
+    <meta property="og:title" content="Gavin Zhu (Guanjia Zhu) | Personal Website" />
+    <meta
+      property="og:description"
+      content="Investor at Llama Ventures. Personal website of Gavin Zhu, also known as Guanjia Zhu."
+    />
+    <meta property="og:image" content="https://gavinzhu.com/wallpaper.jpg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Gavin Zhu (Guanjia Zhu) | Personal Website" />
+    <meta
+      name="twitter:description"
+      content="Investor at Llama Ventures. Personal website of Gavin Zhu, also known as Guanjia Zhu."
+    />
+    <meta name="twitter:image" content="https://gavinzhu.com/wallpaper.jpg" />
+
+    <script>
+      (function () {
+        var primaryHost = 'gavinzhu.com';
+        var aliasHosts = new Set(['guanjiazhu.com']);
+        var currentHost = window.location.hostname;
+
+        if (!aliasHosts.has(currentHost)) return;
+
+        var nextUrl =
+          window.location.protocol +
+          '//' +
+          primaryHost +
+          window.location.pathname +
+          window.location.search +
+          window.location.hash;
+
+        window.location.replace(nextUrl);
+      })();
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://gavinzhu.com/#website",
+            "url": "https://gavinzhu.com/",
+            "name": "Gavin Zhu",
+            "alternateName": "Guanjia Zhu",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Person",
+            "@id": "https://gavinzhu.com/#person",
+            "name": "Gavin Zhu",
+            "alternateName": "Guanjia Zhu",
+            "url": "https://gavinzhu.com/",
+            "email": "mailto:gavin@llamaventures.vc",
+            "jobTitle": "Investor",
+            "description": "Gavin Zhu, also known as Guanjia Zhu, is an investor at Llama Ventures focused on early-stage AI and software companies.",
+            "sameAs": [
+              "https://github.com/SoujiOkita98",
+              "https://www.linkedin.com/in/guanjiazhu/",
+              "https://www.llamaventures.vc/team"
+            ],
+            "worksFor": {
+              "@type": "Organization",
+              "name": "Llama Ventures",
+              "url": "https://www.llamaventures.vc/"
+            },
+            "alumniOf": [
+              {
+                "@type": "CollegeOrUniversity",
+                "name": "Duke University",
+                "sameAs": "https://www.duke.edu/"
+              },
+              {
+                "@type": "CollegeOrUniversity",
+                "name": "University of California San Diego",
+                "sameAs": "https://ucsd.edu/"
+              }
+            ],
+            "knowsLanguage": ["English", "Chinese", "Japanese", "Spanish"],
+            "mainEntityOfPage": {
+              "@id": "https://gavinzhu.com/#website"
+            }
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "@id": "https://gavinzhu.com/#profile-page",
+        "url": "https://gavinzhu.com/",
+        "name": "Gavin Zhu (Guanjia Zhu)",
+        "mainEntity": {
+          "@id": "https://gavinzhu.com/#person"
+        },
+        "isPartOf": {
+          "@id": "https://gavinzhu.com/#website"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main>
+        <h1>Gavin Zhu (Guanjia Zhu)</h1>
+        <p>
+          Investor at Llama Ventures. This is the personal website of Gavin Zhu, also known as
+          Guanjia Zhu.
+        </p>
+        <p>
+          Links:
+          <a href="https://www.linkedin.com/in/guanjiazhu/">LinkedIn</a>,
+          <a href="https://github.com/SoujiOkita98">GitHub</a>,
+          <a href="mailto:gavin@llamaventures.vc">Email</a>
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

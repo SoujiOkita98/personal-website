@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect, Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls, Environment, ContactShadows, Lightformer } from '@react-three/drei'
+import { OrbitControls, Environment, ContactShadows, Lightformer, useProgress } from '@react-three/drei'
 import gsap from 'gsap'
 import MacBookModel from './components/MacBookModel'
 import StudioEnvironment from './components/StudioEnvironment'
@@ -27,6 +27,29 @@ const BASE_SCREEN_FOCUS_DISTANCE = 0.8
 const MOBILE_SCREEN_FOCUS_DISTANCE = 0.92
 const MOBILE_SCREEN_MAX_WIDTH = 768
 const MOBILE_PORTRAIT_ASPECT = 0.85
+const MIN_LOADING_SCREEN_MS = 1800
+const NAME_ASCII = String.raw`
+   _____     __      _______ _   _
+  / ____|   /\ \    / /_   _| \ | |
+ | |  __   /  \ \  / /  | | |  \| |
+ | | |_ | / /\ \ \/ /   | | | . ' |
+ | |__| |/ ____ \  /   _| |_| |\  |
+  \_____/_/    \_\/   |_____|_| \_|
+
+   _____ _    _         _   _      _ _____
+  / ____| |  | |  /\   | \ | |    | |_   _|   /\
+ | |  __| |  | | /  \  |  \| |    | | | |    /  \
+ | | |_ | |  | |/ /\ \ | . ' |_   | | | |   / /\ \
+ | |__| | |__| / ____ \| |\  | |__| |_| |_ / ____ \
+  \_____|\____/_/    \_\_| \_|\____/|_____/_/    \_\
+
+  _______    _ _    _
+ |___  / |  | | |  | |
+    / /| |__| | |  | |
+   / / |  __  | |  | |
+  / /__| |  | | |__| |
+ /_____|_|  |_|\____/
+`
 
 function getAdaptiveFov(aspect: number) {
   if (aspect <= 0) return BASE_FOV
@@ -136,6 +159,86 @@ function CameraAnimator({
   return null
 }
 
+function LoadingOverlay() {
+  const { active, progress, loaded, total } = useProgress()
+  const [dismissed, setDismissed] = useState(false)
+  const [readyToEnter, setReadyToEnter] = useState(false)
+  const mountedAtRef = useRef(typeof performance !== 'undefined' ? performance.now() : Date.now())
+
+  useEffect(() => {
+    if (active) {
+      setDismissed(false)
+      setReadyToEnter(false)
+      return
+    }
+
+    if (total === 0) return
+
+    const elapsed = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - mountedAtRef.current
+    const delay = Math.max(0, MIN_LOADING_SCREEN_MS - elapsed)
+
+    const timer = window.setTimeout(() => {
+      setReadyToEnter(true)
+    }, delay)
+
+    return () => window.clearTimeout(timer)
+  }, [active, total])
+
+  useEffect(() => {
+    if (!readyToEnter || dismissed) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        setDismissed(true)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [readyToEnter, dismissed])
+
+  if (dismissed) return null
+
+  const roundedProgress = total > 0 ? Math.min(100, Math.round(progress)) : 0
+  const statusLabel = active
+    ? `Loading scene assets ${roundedProgress}%`
+    : readyToEnter
+      ? 'Scene ready. Press Enter or click to enter.'
+      : 'Preparing scene'
+
+  return (
+    <div
+      className={`loading-screen${readyToEnter ? ' loading-screen-ready' : ''}`}
+      aria-live="polite"
+      aria-label={statusLabel}
+      onClick={readyToEnter ? () => setDismissed(true) : undefined}
+    >
+      <div className="loading-panel">
+        <p className="loading-eyebrow">gavinzhu.com</p>
+        <pre className="loading-ascii loading-ascii-name" aria-hidden="true">{NAME_ASCII}</pre>
+        <div className="loading-terminal-line">
+          <span className="loading-prompt">boot</span>
+          <span className="loading-status-text">
+            {active ? 'hydrating desk scene and terminal shell' : 'scene staged and waiting'}
+          </span>
+        </div>
+        <div className="loading-bar" aria-hidden="true">
+          <div
+            className="loading-bar-fill"
+            style={{ transform: `scaleX(${Math.max(0.08, roundedProgress / 100)})` }}
+          />
+        </div>
+        <p className="loading-meta">
+          {active
+            ? `${loaded}/${total || '?'} assets • ${roundedProgress}%`
+            : 'Click anywhere or press Enter to enter'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export default function Scene3D() {
   const [phase, setPhase] = useState<'explore' | 'zooming' | 'focused'>('explore')
   const [adaptiveFov, setAdaptiveFov] = useState(BASE_FOV)
@@ -206,6 +309,24 @@ export default function Scene3D() {
 
   return (
     <div className="scene-container">
+      <LoadingOverlay />
+
+      <main className="sr-only">
+        <h1>Gavin Zhu (Guanjia Zhu)</h1>
+        <p>
+          Personal website of Gavin Zhu, also known as Guanjia Zhu, investor at Llama Ventures.
+        </p>
+        <p>
+          Gavin Zhu studied at Duke University and UC San Diego, works in early-stage investing,
+          and builds with AI, React, TypeScript, and product tooling.
+        </p>
+        <ul>
+          <li><a href="https://www.linkedin.com/in/guanjiazhu/">LinkedIn</a></li>
+          <li><a href="https://github.com/SoujiOkita98">GitHub</a></li>
+          <li><a href="mailto:gavin@llamaventures.vc">gavin@llamaventures.vc</a></li>
+        </ul>
+      </main>
+
       {/* ── Screen portal layer ──
           HTML desktop (via drei Html + portal prop) renders here,
           BEHIND the transparent WebGL canvas. The canvas has a
@@ -310,14 +431,14 @@ export default function Scene3D() {
       {/* Enter button */}
       {phase === 'explore' && (
         <button className="enter-button" onClick={handleEnter}>
-          Enter
+          <span className="enter-button-text" data-text="Get closer">Get closer</span>
         </button>
       )}
 
       {/* Fade out during zoom */}
       {phase === 'zooming' && (
         <button className="enter-button fade-out">
-          Enter
+          <span className="enter-button-text" data-text="Get closer">Get closer</span>
         </button>
       )}
 

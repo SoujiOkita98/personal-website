@@ -271,6 +271,7 @@ export default function MacBookModel({
 }
 
 useGLTF.preload('/models/macbook_pro_m3.glb')
+useTexture.preload('/wallpaper.jpg')
 
 // ── Convex Hull — Andrew's monotone chain, O(n log n) ──
 function convexHull(points: [number, number][]): [number, number][] {

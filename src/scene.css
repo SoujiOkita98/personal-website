@@ -1,3 +1,43 @@
+@font-face {
+  font-family: 'Geist Pixel Square';
+  src: url('/fonts/GeistPixel-Square.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Pixel Line';
+  src: url('/fonts/GeistPixel-Line.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Pixel Grid';
+  src: url('/fonts/GeistPixel-Grid.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Pixel Triangle';
+  src: url('/fonts/GeistPixel-Triangle.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Pixel Circle';
+  src: url('/fonts/GeistPixel-Circle.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 .scene-container {
   width: 100%;
   height: 100%;
@@ -9,6 +49,143 @@
 
 .scene-container canvas {
   display: block;
+}
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px 24px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 1), rgba(247, 247, 244, 1) 58%, rgba(237, 237, 232, 1) 100%),
+    linear-gradient(130deg, rgba(255, 255, 255, 1), rgba(243, 243, 239, 1));
+  opacity: 1;
+  transition: opacity 0.22s ease;
+}
+
+.loading-screen-ready {
+  cursor: pointer;
+}
+
+.loading-panel {
+  width: min(100%, 1240px);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-eyebrow {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.5);
+  font-family: 'Geist Pixel Line', 'Courier New', 'SF Mono', 'Menlo', 'Monaco', monospace;
+  text-shadow:
+    1px 0 0 rgba(0, 0, 0, 0.16),
+    2px 0 0 rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.loading-ascii {
+  margin: 0;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Mono', 'Consolas', 'Liberation Mono', monospace;
+  font-size: clamp(6px, calc((100vw - 48px) / 112), 11px);
+  line-height: 1;
+  color: rgba(13, 13, 13, 0.94);
+  white-space: pre;
+  text-align: left;
+  overflow-x: hidden;
+  padding: 4px 0 0;
+  text-shadow:
+    1px 0 0 rgba(0, 0, 0, 0.08);
+}
+
+.loading-ascii-name {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.loading-terminal-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 2px 0 2px;
+  font-family: 'Geist Pixel Grid', 'Geist Pixel Line', 'Courier New', 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow:
+    1px 0 0 rgba(0, 0, 0, 0.18),
+    2px 0 0 rgba(0, 0, 0, 0.08);
+}
+
+.loading-prompt {
+  color: #151515;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Geist Pixel Triangle', 'Geist Pixel Square', 'Geist Pixel Line', 'Courier New', monospace;
+}
+
+.loading-status-text {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.loading-bar {
+  width: min(100%, 620px);
+  height: 12px;
+  overflow: hidden;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.08) 0 8px,
+      rgba(0, 0, 0, 0.03) 8px 12px
+    );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.loading-bar-fill {
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #101010 0 9px,
+      #3a3a3a 9px 14px,
+      #6a6a6a 14px 18px
+    );
+  transition: transform 0.24s steps(36, end);
+}
+
+.loading-meta {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-family: 'Geist Pixel Grid', 'Geist Pixel Line', 'Courier New', 'SF Mono', 'Menlo', 'Monaco', monospace;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.58);
+  text-shadow:
+    1px 0 0 rgba(0, 0, 0, 0.16),
+    2px 0 0 rgba(0, 0, 0, 0.08);
 }
 
 /* ===== SCREEN PORTAL LAYER =====
@@ -40,41 +217,47 @@
 /* ===== ENTER BUTTON ===== */
 .enter-button {
   position: fixed;
-  bottom: 12%;
+  bottom: 12.5%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
-  padding: 12px 36px;
-  font-size: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-weight: 600;
-  color: #5a4a3a;
-  background: rgba(255, 255, 255, 0.85);
-  border: 2px solid rgba(180, 160, 140, 0.4);
-  border-radius: 40px;
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.28s ease, opacity 0.4s ease;
   user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.enter-button-text {
+  display: inline-block;
+  font-family: 'Geist Pixel Square', 'Geist Pixel Circle', 'Geist Pixel Line', 'Arial Black', 'Helvetica Neue', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  font-size: clamp(26px, 4.2vw, 44px);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(250, 250, 247, 0.98);
+  line-height: 1;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.42),
+    0 3px 0 rgba(86, 86, 86, 0.26),
+    0 9px 18px rgba(0, 0, 0, 0.2);
 }
 
 .enter-button:hover {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12);
-  transform: translateX(-50%) translateY(-2px);
+  transform: translateX(-50%) translateY(-4px);
 }
 
 .enter-button:active {
-  transform: translateX(-50%) translateY(0px);
+  transform: translateX(-50%) translateY(-1px) scale(0.99);
 }
 
 .enter-button.fade-out {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.45s ease;
 }
 
 /* Html component screen wrapper */
@@ -133,4 +316,39 @@
 .back-button:active {
   background: rgba(0, 0, 0, 0.55);
   transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .loading-panel {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .loading-ascii {
+    font-size: clamp(5px, calc((100vw - 28px) / 65), 7px);
+    line-height: 1;
+  }
+
+  .loading-terminal-line {
+    font-size: 10px;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .loading-bar {
+    width: min(100%, 420px);
+    height: 10px;
+  }
+
+  .loading-eyebrow {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 5px);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+
+  .enter-button-text {
+    font-size: clamp(22px, 8.2vw, 34px);
+    letter-spacing: 0.06em;
+  }
 }
