@@ -8,7 +8,7 @@ import App from '../App'
 interface MacBookModelProps {
   position?: [number, number, number]
   screenPortal?: RefObject<HTMLDivElement | null>
-  phase?: 'explore' | 'zooming' | 'focused'
+  phase?: string
 }
 
 // Scale: model is ~35.5 units wide, we want ~0.70 scene units
@@ -22,7 +22,7 @@ export default function MacBookModel({
   screenPortal,
   phase = 'explore',
 }: MacBookModelProps) {
-  const { scene } = useGLTF('/models/macbook_pro_m3.glb', false, true)
+  const { scene } = useGLTF('/models/macbook_pro_m3.glb')
   const groupRef = useRef<THREE.Group>(null)
   const { camera, size } = useThree()
 
@@ -270,7 +270,7 @@ export default function MacBookModel({
   )
 }
 
-useGLTF.preload('/models/macbook_pro_m3.glb', false, true)
+useGLTF.preload('/models/macbook_pro_m3.glb')
 useTexture.preload('/wallpaper.jpg')
 
 // ── Convex Hull — Andrew's monotone chain, O(n log n) ──
