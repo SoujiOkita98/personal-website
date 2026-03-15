@@ -214,12 +214,28 @@
   );
 }
 
-/* ===== ENTER BUTTON ===== */
-.enter-button {
+/* ===== ACTION BUTTONS CONTAINER ===== */
+.action-buttons {
   position: fixed;
   bottom: 12.5%;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transition: opacity 0.45s ease;
+}
+
+.action-buttons.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== ENTER BUTTON ===== */
+.enter-button {
+  position: relative;
   z-index: 100;
   background: transparent;
   border: none;
@@ -247,17 +263,16 @@
 }
 
 .enter-button:hover {
-  transform: translateX(-50%) translateY(-4px);
+  transform: translateY(-4px);
 }
 
 .enter-button:active {
-  transform: translateX(-50%) translateY(-1px) scale(0.99);
+  transform: translateY(-1px) scale(0.99);
 }
 
-.enter-button.fade-out {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.45s ease;
+.look-around-button .enter-button-text {
+  font-size: clamp(14px, 2.4vw, 22px);
+  color: rgba(250, 250, 247, 0.7);
 }
 
 /* Html component screen wrapper */
@@ -316,6 +331,85 @@
 .back-button:active {
   background: rgba(0, 0, 0, 0.55);
   transform: scale(0.95);
+}
+
+/* ===== EXHIBIT DESCRIPTION CARD ===== */
+.exhibit-card {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  max-width: 320px;
+  padding: 20px 22px 16px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: exhibit-fade-in 0.6s ease 0.8s both;
+}
+
+@keyframes exhibit-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.exhibit-title {
+  margin: 0 0 8px;
+  font-family: 'Geist Pixel Square', 'Arial Black', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.exhibit-desc {
+  margin: 0 0 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.exhibit-desc em {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.exhibit-credit {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.exhibit-credit a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.exhibit-credit a:hover {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .exhibit-card {
+    bottom: 16px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
+    padding: 16px 18px 12px;
+  }
+
+  .exhibit-title {
+    font-size: 15px;
+  }
+
+  .exhibit-desc {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 768px) {

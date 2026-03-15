@@ -22,7 +22,7 @@ export default function MacBookModel({
   screenPortal,
   phase = 'explore',
 }: MacBookModelProps) {
-  const { scene } = useGLTF('/models/macbook_pro_m3.glb')
+  const { scene } = useGLTF('/models/macbook_pro_m3.glb', false, true)
   const groupRef = useRef<THREE.Group>(null)
   const { camera, size } = useThree()
 
@@ -270,7 +270,7 @@ export default function MacBookModel({
   )
 }
 
-useGLTF.preload('/models/macbook_pro_m3.glb')
+useGLTF.preload('/models/macbook_pro_m3.glb', false, true)
 useTexture.preload('/wallpaper.jpg')
 
 // ── Convex Hull — Andrew's monotone chain, O(n log n) ──

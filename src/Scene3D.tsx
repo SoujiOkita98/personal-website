@@ -1,12 +1,15 @@
 import { useRef, useState, useCallback, useEffect, Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, Environment, ContactShadows, Lightformer, useProgress } from '@react-three/drei'
+import * as THREE from 'three'
 import gsap from 'gsap'
 import MacBookModel from './components/MacBookModel'
+import SiegeTankModel from './components/SiegeTankModel'
 import StudioEnvironment from './components/StudioEnvironment'
 import DeskSetup from './components/DeskSetup'
 import PlantModel from './components/PlantModel'
 import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
+import CouchScene from './components/CouchScene'
 import './scene.css'
 
 // MacBook position relative to desk group
@@ -27,6 +30,14 @@ const BASE_SCREEN_FOCUS_DISTANCE = 0.8
 const MOBILE_SCREEN_FOCUS_DISTANCE = 0.92
 const MOBILE_SCREEN_MAX_WIDTH = 768
 const MOBILE_PORTRAIT_ASPECT = 0.85
+
+// Siege tank placement (world coords, 10 o'clock from the desk)
+const TANK_POSITION: [number, number, number] = [3, 0, -10]
+const TANK_ROTATION: [number, number, number] = [0, Math.PI * 0.6 - Math.PI / 2, 0]
+
+// Couch scene placement (left of desk, ~9 o'clock)
+const COUCH_POSITION: [number, number, number] = [-2.5, 0, 0]
+const COUCH_ROTATION: [number, number, number] = [0, Math.PI * 0.3, 0]
 const MIN_LOADING_SCREEN_MS = 1800
 const NAME_ASCII = String.raw`
    _____     __      _______ _   _
@@ -78,83 +89,181 @@ function CameraAnimator({
   controlsRef,
   onZoomIn,
   onZoomOut,
+  onTankZoomIn,
+  onTankZoomOut,
+  onCouchZoomIn,
+  onCouchZoomOut,
+  onPSPZoomIn,
+  onPSPZoomOut,
+  on3DSZoomIn,
+  on3DSZoomOut,
 }: {
   controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>
   onZoomIn: () => void
   onZoomOut: () => void
+  onTankZoomIn: () => void
+  onTankZoomOut: () => void
+  onCouchZoomIn: () => void
+  onCouchZoomOut: () => void
+  onPSPZoomIn: () => void
+  onPSPZoomOut: () => void
+  on3DSZoomIn: () => void
+  on3DSZoomOut: () => void
 }) {
   const { camera } = useThree()
-  const hasRun = useRef(false)
+  const currentTarget = useRef<'none' | 'screen' | 'tank' | 'couch'>('none')
 
-  const zoomIn = useCallback(() => {
-    if (hasRun.current) return
-    hasRun.current = true
+  // Helper: animate camera to a position looking at a target, then call onDone
+  const animateTo = useCallback(
+    (
+      pos: [number, number, number],
+      lookAt: [number, number, number],
+      duration: number,
+      onDone: () => void,
+      restoreOrbit?: { target: [number, number, number] },
+    ) => {
+      if (controlsRef.current) controlsRef.current.enabled = false
+
+      gsap.to(camera.position, {
+        x: pos[0],
+        y: pos[1],
+        z: pos[2],
+        duration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          camera.lookAt(lookAt[0], lookAt[1], lookAt[2])
+          camera.updateProjectionMatrix()
+        },
+        onComplete: () => {
+          camera.lookAt(lookAt[0], lookAt[1], lookAt[2])
+          camera.updateProjectionMatrix()
+          if (controlsRef.current) {
+            const t = restoreOrbit?.target ?? lookAt
+            controlsRef.current.target.set(t[0], t[1], t[2])
+            controlsRef.current.enabled = true
+          }
+          onDone()
+        },
+      })
+    },
+    [camera, controlsRef],
+  )
+
+  // ── Screen zoom ──
+  const zoomToScreen = useCallback(() => {
+    if (currentTarget.current !== 'none') return
+    currentTarget.current = 'screen'
     const focusDistance = getScreenFocusDistance(window.innerWidth, window.innerHeight)
+    animateTo(
+      [SCREEN_TARGET[0], SCREEN_TARGET[1], SCREEN_TARGET[2] + focusDistance],
+      SCREEN_TARGET,
+      2.5,
+      onZoomIn,
+    )
+  }, [animateTo, onZoomIn])
 
-    // Disable controls during animation so they don't fight gsap
-    if (controlsRef.current) controlsRef.current.enabled = false
+  const zoomOutFromScreen = useCallback(() => {
+    if (currentTarget.current !== 'screen') return
+    currentTarget.current = 'none'
+    animateTo(INITIAL_CAM_POS, ORBIT_TARGET, 2.0, onZoomOut, { target: ORBIT_TARGET })
+  }, [animateTo, onZoomOut])
 
-    gsap.to(camera.position, {
-      x: SCREEN_TARGET[0],
-      y: SCREEN_TARGET[1],
-      z: SCREEN_TARGET[2] + focusDistance,
-      duration: 2.5,
-      ease: 'power2.inOut',
-      onUpdate: () => {
-        camera.lookAt(SCREEN_TARGET[0], SCREEN_TARGET[1], SCREEN_TARGET[2])
-        camera.updateProjectionMatrix()
-      },
-      onComplete: () => {
-        camera.lookAt(SCREEN_TARGET[0], SCREEN_TARGET[1], SCREEN_TARGET[2])
-        camera.updateProjectionMatrix()
-        // Re-enable controls with new target centered on screen
-        if (controlsRef.current) {
-          controlsRef.current.target.set(SCREEN_TARGET[0], SCREEN_TARGET[1], SCREEN_TARGET[2])
-          controlsRef.current.enabled = true
-        }
-        onZoomIn()
-      },
-    })
-  }, [camera, controlsRef, onZoomIn])
+  // ── Tank zoom ──
+  const zoomToTank = useCallback(() => {
+    if (currentTarget.current !== 'none') return
+    const w = window as unknown as Record<string, [number, number, number]>
+    const tankTarget = w.__tankCamTarget
+    const tankCamPos = w.__tankCamPos
+    if (!tankTarget || !tankCamPos) return
+    currentTarget.current = 'tank'
+    animateTo(tankCamPos, tankTarget, 2.5, onTankZoomIn)
+  }, [animateTo, onTankZoomIn])
 
-  const zoomOut = useCallback(() => {
-    if (!hasRun.current) return
-    hasRun.current = false
+  const zoomOutFromTank = useCallback(() => {
+    if (currentTarget.current !== 'tank') return
+    currentTarget.current = 'none'
+    animateTo(INITIAL_CAM_POS, ORBIT_TARGET, 2.0, onTankZoomOut, { target: ORBIT_TARGET })
+  }, [animateTo, onTankZoomOut])
 
-    if (controlsRef.current) controlsRef.current.enabled = false
+  // ── Couch zoom ──
+  const zoomToCouch = useCallback(() => {
+    if (currentTarget.current !== 'none') return
+    const w = window as unknown as Record<string, [number, number, number]>
+    const couchTarget = w.__couchCamTarget
+    const couchCamPos = w.__couchCamPos
+    if (!couchTarget || !couchCamPos) return
+    currentTarget.current = 'couch'
+    animateTo(couchCamPos, couchTarget, 2.5, onCouchZoomIn)
+  }, [animateTo, onCouchZoomIn])
 
-    gsap.to(camera.position, {
-      x: INITIAL_CAM_POS[0],
-      y: INITIAL_CAM_POS[1],
-      z: INITIAL_CAM_POS[2],
-      duration: 2.0,
-      ease: 'power2.inOut',
-      onUpdate: () => {
-        camera.lookAt(ORBIT_TARGET[0], ORBIT_TARGET[1], ORBIT_TARGET[2])
-        camera.updateProjectionMatrix()
-      },
-      onComplete: () => {
-        camera.lookAt(ORBIT_TARGET[0], ORBIT_TARGET[1], ORBIT_TARGET[2])
-        camera.updateProjectionMatrix()
-        // Restore original orbit target
-        if (controlsRef.current) {
-          controlsRef.current.target.set(ORBIT_TARGET[0], ORBIT_TARGET[1], ORBIT_TARGET[2])
-          controlsRef.current.enabled = true
-        }
-        onZoomOut()
-      },
-    })
-  }, [camera, controlsRef, onZoomOut])
+  const zoomOutFromCouch = useCallback(() => {
+    if (currentTarget.current !== 'couch') return
+    currentTarget.current = 'none'
+    animateTo(INITIAL_CAM_POS, ORBIT_TARGET, 2.0, onCouchZoomOut, { target: ORBIT_TARGET })
+  }, [animateTo, onCouchZoomOut])
+
+  // ── PSP zoom (nested from couch view) ──
+  const zoomToPSP = useCallback(() => {
+    const w = window as unknown as Record<string, [number, number, number]>
+    const pspTarget = w.__pspCamTarget
+    const pspCamPos = w.__pspCamPos
+    if (!pspTarget || !pspCamPos) return
+    currentTarget.current = 'couch' // keep couch as the parent context
+    animateTo(pspCamPos, pspTarget, 2.0, onPSPZoomIn)
+  }, [animateTo, onPSPZoomIn])
+
+  const zoomOutFromPSP = useCallback(() => {
+    // Zoom back to couch overview, not to initial explore
+    const w = window as unknown as Record<string, [number, number, number]>
+    const couchTarget = w.__couchCamTarget
+    const couchCamPos = w.__couchCamPos
+    if (!couchTarget || !couchCamPos) return
+    animateTo(couchCamPos, couchTarget, 2.0, onPSPZoomOut)
+  }, [animateTo, onPSPZoomOut])
+
+  // ── 3DS zoom (nested from couch view) ──
+  const zoomTo3DS = useCallback(() => {
+    const w = window as unknown as Record<string, [number, number, number]>
+    const target = w.__n3dsCamTarget
+    const camPos = w.__n3dsCamPos
+    if (!target || !camPos) return
+    currentTarget.current = 'couch'
+    animateTo(camPos, target, 2.0, on3DSZoomIn)
+  }, [animateTo, on3DSZoomIn])
+
+  const zoomOutFrom3DS = useCallback(() => {
+    const w = window as unknown as Record<string, [number, number, number]>
+    const couchTarget = w.__couchCamTarget
+    const couchCamPos = w.__couchCamPos
+    if (!couchTarget || !couchCamPos) return
+    animateTo(couchCamPos, couchTarget, 2.0, on3DSZoomOut)
+  }, [animateTo, on3DSZoomOut])
 
   useEffect(() => {
     const w = window as unknown as Record<string, unknown>
-    w.__zoomToScreen = zoomIn
-    w.__zoomOutFromScreen = zoomOut
+    w.__zoomToScreen = zoomToScreen
+    w.__zoomOutFromScreen = zoomOutFromScreen
+    w.__zoomToTank = zoomToTank
+    w.__zoomOutFromTank = zoomOutFromTank
+    w.__zoomToCouch = zoomToCouch
+    w.__zoomOutFromCouch = zoomOutFromCouch
+    w.__zoomToPSP = zoomToPSP
+    w.__zoomOutFromPSP = zoomOutFromPSP
+    w.__zoomTo3DS = zoomTo3DS
+    w.__zoomOutFrom3DS = zoomOutFrom3DS
     return () => {
       delete w.__zoomToScreen
       delete w.__zoomOutFromScreen
+      delete w.__zoomToTank
+      delete w.__zoomOutFromTank
+      delete w.__zoomToCouch
+      delete w.__zoomOutFromCouch
+      delete w.__zoomToPSP
+      delete w.__zoomOutFromPSP
+      delete w.__zoomTo3DS
+      delete w.__zoomOutFrom3DS
     }
-  }, [zoomIn, zoomOut])
+  }, [zoomToScreen, zoomOutFromScreen, zoomToTank, zoomOutFromTank, zoomToCouch, zoomOutFromCouch, zoomToPSP, zoomOutFromPSP, zoomTo3DS, zoomOutFrom3DS])
 
   return null
 }
@@ -239,11 +348,75 @@ function LoadingOverlay() {
   )
 }
 
+type Phase = 'explore' | 'zooming' | 'focused' | 'menu' | 'tank-zooming' | 'tank-view' | 'couch-zooming' | 'couch-view' | 'couch-menu' | 'psp-zooming' | 'psp-view' | 'n3ds-zooming' | 'n3ds-view'
+
 export default function Scene3D() {
-  const [phase, setPhase] = useState<'explore' | 'zooming' | 'focused'>('explore')
+  const [phase, setPhase] = useState<Phase>('explore')
   const [adaptiveFov, setAdaptiveFov] = useState(BASE_FOV)
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null)
   const screenPortalRef = useRef<HTMLDivElement>(null)
+  const tankCamRef = useRef<{ target: [number, number, number]; camPos: [number, number, number] } | null>(null)
+  const couchCamRef = useRef<{ target: [number, number, number]; camPos: [number, number, number] } | null>(null)
+
+  const handleTankBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
+    // Place camera at a 45° angle from front-right, 1.2x the max dimension away
+    const maxDim = Math.max(size.x, size.y, size.z)
+    const dist = maxDim * 1.2
+    const target: [number, number, number] = [center.x, center.y * 0.6, center.z]
+    const camPos: [number, number, number] = [
+      center.x + dist * 0.6,
+      center.y + dist * 0.4,
+      center.z + dist * 0.7,
+    ]
+    tankCamRef.current = { target, camPos }
+    // Expose for CameraAnimator
+    const w = window as unknown as Record<string, unknown>
+    w.__tankCamTarget = target
+    w.__tankCamPos = camPos
+  }, [])
+
+  const handleCouchBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
+    const maxDim = Math.max(size.x, size.y, size.z)
+    const dist = maxDim * 0.25
+    const target: [number, number, number] = [center.x, center.y + 0.3, center.z]
+    const camPos: [number, number, number] = [
+      center.x + dist * 0.4,
+      center.y + dist * 0.6,
+      center.z + dist * 0.9,
+    ]
+    couchCamRef.current = { target, camPos }
+    const w = window as unknown as Record<string, unknown>
+    w.__couchCamTarget = target
+    w.__couchCamPos = camPos
+  }, [])
+
+  const handlePSPBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
+    const maxDim = Math.max(size.x, size.y, size.z)
+    const dist = maxDim * 2.5
+    const target: [number, number, number] = [center.x, center.y, center.z]
+    const camPos: [number, number, number] = [
+      center.x + dist * 0.3,
+      center.y + dist * 0.5,
+      center.z + dist * 0.8,
+    ]
+    const w = window as unknown as Record<string, unknown>
+    w.__pspCamTarget = target
+    w.__pspCamPos = camPos
+  }, [])
+
+  const handle3DSBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
+    const maxDim = Math.max(size.x, size.y, size.z)
+    const dist = maxDim * 2.5
+    const target: [number, number, number] = [center.x, center.y, center.z]
+    const camPos: [number, number, number] = [
+      center.x + dist * 0.3,
+      center.y + dist * 0.5,
+      center.z + dist * 0.8,
+    ]
+    const w = window as unknown as Record<string, unknown>
+    w.__n3dsCamTarget = target
+    w.__n3dsCamPos = camPos
+  }, [])
 
   // Keep camera framing adaptive to viewport shape, but ignore keyboard-only viewport changes.
   useEffect(() => {
@@ -298,14 +471,126 @@ export default function Scene3D() {
     setPhase('explore')
   }, [])
 
+  // ── Tank handlers ──
+  const handleLookAround = () => {
+    if (phase !== 'explore') return
+    setPhase('menu')
+  }
+
+  const handleMenuSelect = (destination: string) => {
+    if (destination === 'tank') {
+      setPhase('tank-zooming')
+      const zoom = (window as unknown as Record<string, () => void>).__zoomToTank
+      if (zoom) zoom()
+    } else if (destination === 'couch') {
+      setPhase('couch-zooming')
+      const zoom = (window as unknown as Record<string, () => void>).__zoomToCouch
+      if (zoom) zoom()
+    }
+  }
+
+  const handleMenuBack = () => {
+    setPhase('explore')
+  }
+
+  const handleTankZoomInComplete = useCallback(() => {
+    setPhase('tank-view')
+  }, [])
+
+  const handleTankExit = useCallback(() => {
+    if (phase !== 'tank-view') return
+    setPhase('tank-zooming')
+    const zoomOut = (window as unknown as Record<string, () => void>).__zoomOutFromTank
+    if (zoomOut) zoomOut()
+  }, [phase])
+
+  const handleTankZoomOutComplete = useCallback(() => {
+    setPhase('explore')
+  }, [])
+
+  const handleCouchZoomInComplete = useCallback(() => {
+    setPhase('couch-view')
+  }, [])
+
+  const handleCouchExit = useCallback(() => {
+    if (phase !== 'couch-view') return
+    setPhase('couch-zooming')
+    const zoomOut = (window as unknown as Record<string, () => void>).__zoomOutFromCouch
+    if (zoomOut) zoomOut()
+  }, [phase])
+
+  const handleCouchZoomOutComplete = useCallback(() => {
+    setPhase('explore')
+  }, [])
+
+  // ── Nested couch menu / PSP handlers ──
+  const handleCouchLookAround = () => {
+    if (phase !== 'couch-view') return
+    setPhase('couch-menu')
+  }
+
+  const handleCouchMenuSelect = (destination: string) => {
+    if (destination === 'psp') {
+      setPhase('psp-zooming')
+      const zoom = (window as unknown as Record<string, () => void>).__zoomToPSP
+      if (zoom) zoom()
+    } else if (destination === 'n3ds') {
+      setPhase('n3ds-zooming')
+      const zoom = (window as unknown as Record<string, () => void>).__zoomTo3DS
+      if (zoom) zoom()
+    }
+  }
+
+  const handleCouchMenuBack = () => {
+    setPhase('couch-view')
+  }
+
+  const handlePSPZoomInComplete = useCallback(() => {
+    setPhase('psp-view')
+  }, [])
+
+  const handlePSPExit = useCallback(() => {
+    if (phase !== 'psp-view') return
+    setPhase('psp-zooming')
+    const zoomOut = (window as unknown as Record<string, () => void>).__zoomOutFromPSP
+    if (zoomOut) zoomOut()
+  }, [phase])
+
+  const handlePSPZoomOutComplete = useCallback(() => {
+    setPhase('couch-view')
+  }, [])
+
+  const handle3DSZoomInComplete = useCallback(() => {
+    setPhase('n3ds-view')
+  }, [])
+
+  const handle3DSExit = useCallback(() => {
+    if (phase !== 'n3ds-view') return
+    setPhase('n3ds-zooming')
+    const zoomOut = (window as unknown as Record<string, () => void>).__zoomOutFrom3DS
+    if (zoomOut) zoomOut()
+  }, [phase])
+
+  const handle3DSZoomOutComplete = useCallback(() => {
+    setPhase('couch-view')
+  }, [])
+
   // ESC key listener
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleExit()
+      if (e.key === 'Escape') {
+        if (phase === 'focused') handleExit()
+        else if (phase === 'tank-view') handleTankExit()
+        else if (phase === 'couch-view') handleCouchExit()
+        else if (phase === 'menu') handleMenuBack()
+        else if (phase === 'psp-view') handlePSPExit()
+        else if (phase === 'n3ds-view') handle3DSExit()
+        else if (phase === 'couch-menu') handleCouchMenuBack()
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [handleExit])
+  }, [handleExit, handleTankExit, handleCouchExit, handlePSPExit, handle3DSExit, phase])
 
   return (
     <div className="scene-container">
@@ -345,7 +630,7 @@ export default function Scene3D() {
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}
-        style={{ zIndex: 1, pointerEvents: phase === 'focused' ? 'none' : 'auto' }}
+        style={{ zIndex: 1, pointerEvents: phase === 'focused' ? 'none' : 'auto', cursor: (phase === 'tank-view' || phase === 'couch-view' || phase === 'psp-view' || phase === 'n3ds-view') ? 'grab' : undefined }}
       >
         {/* Lighting */}
         <ambientLight intensity={0.4} color="#ffffff" />
@@ -356,10 +641,10 @@ export default function Scene3D() {
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
-          shadow-camera-left={-3}
-          shadow-camera-right={3}
-          shadow-camera-top={3}
-          shadow-camera-bottom={-3}
+          shadow-camera-left={-6}
+          shadow-camera-right={6}
+          shadow-camera-top={6}
+          shadow-camera-bottom={-6}
           shadow-bias={-0.0001}
         />
         <directionalLight position={[-2, 3, 4]} intensity={0.4} color="#f0f0ff" />
@@ -384,9 +669,9 @@ export default function Scene3D() {
         <ContactShadows
           position={[0, 0.001, -1.6]}
           opacity={0.4}
-          scale={10}
+          scale={30}
           blur={2.5}
-          far={4}
+          far={10}
           resolution={256}
           color="#000000"
         />
@@ -408,13 +693,44 @@ export default function Scene3D() {
           <StationWagon position={[-0.55, 0.742, -0.15]} />
         </group>
 
+        {/* Siege Tank */}
+        <SiegeTankModel
+          position={TANK_POSITION}
+          rotation={TANK_ROTATION}
+          shouldSiege={phase === 'tank-view'}
+          onBoundsReady={handleTankBounds}
+        />
+        {/* Tank lighting */}
+        <pointLight
+          position={[-3, 8, -6]}
+          intensity={8}
+          distance={20}
+          color="#ffffff"
+        />
+
+        {/* Couch gaming scene */}
+        <CouchScene
+          position={COUCH_POSITION}
+          rotation={COUCH_ROTATION}
+          onBoundsReady={handleCouchBounds}
+          onPSPBoundsReady={handlePSPBounds}
+          on3DSBoundsReady={handle3DSBounds}
+        />
+        {/* Couch area warm lighting */}
+        <pointLight
+          position={[-2.5, 2, 0]}
+          intensity={5}
+          distance={8}
+          color="#ffe4b5"
+        />
+
         <OrbitControls
           ref={controlsRef}
           target={[0, 0.9, -1.4]}
           enablePan={false}
           enableZoom={true}
           minDistance={0.3}
-          maxDistance={5.0}
+          maxDistance={50}
           minPolarAngle={Math.PI * 0.05}
           maxPolarAngle={Math.PI * 0.48}
           enableDamping
@@ -425,28 +741,141 @@ export default function Scene3D() {
           controlsRef={controlsRef}
           onZoomIn={handleZoomInComplete}
           onZoomOut={handleZoomOutComplete}
+          onTankZoomIn={handleTankZoomInComplete}
+          onTankZoomOut={handleTankZoomOutComplete}
+          onCouchZoomIn={handleCouchZoomInComplete}
+          onCouchZoomOut={handleCouchZoomOutComplete}
+          onPSPZoomIn={handlePSPZoomInComplete}
+          onPSPZoomOut={handlePSPZoomOutComplete}
+          on3DSZoomIn={handle3DSZoomInComplete}
+          on3DSZoomOut={handle3DSZoomOutComplete}
         />
       </Canvas>
 
-      {/* Enter button */}
+      {/* Action buttons */}
       {phase === 'explore' && (
-        <button className="enter-button" onClick={handleEnter}>
-          <span className="enter-button-text" data-text="Get closer">Get closer</span>
-        </button>
+        <div className="action-buttons">
+          <button className="enter-button" onClick={handleEnter}>
+            <span className="enter-button-text" data-text="Go to Desk">Go to Desk</span>
+          </button>
+          <button className="enter-button look-around-button" onClick={handleLookAround}>
+            <span className="enter-button-text" data-text="Look around">Look around</span>
+          </button>
+        </div>
+      )}
+
+      {/* Destination menu */}
+      {phase === 'menu' && (
+        <div className="action-buttons">
+          <button className="enter-button" onClick={() => handleMenuSelect('tank')}>
+            <span className="enter-button-text" data-text="Siege Tank">Siege Tank</span>
+          </button>
+          <button className="enter-button" onClick={() => handleMenuSelect('couch')}>
+            <span className="enter-button-text" data-text="Gaming Corner">Gaming Corner</span>
+          </button>
+          <button className="enter-button look-around-button" onClick={handleMenuBack}>
+            <span className="enter-button-text" data-text="← Back">← Back</span>
+          </button>
+        </div>
       )}
 
       {/* Fade out during zoom */}
-      {phase === 'zooming' && (
-        <button className="enter-button fade-out">
-          <span className="enter-button-text" data-text="Get closer">Get closer</span>
-        </button>
+      {(phase === 'zooming' || phase === 'tank-zooming' || phase === 'couch-zooming') && (
+        <div className="action-buttons fade-out">
+          <button className="enter-button">
+            <span className="enter-button-text" data-text="Go to Desk">Go to Desk</span>
+          </button>
+          <button className="enter-button look-around-button">
+            <span className="enter-button-text" data-text="Look around">Look around</span>
+          </button>
+        </div>
       )}
 
       {/* Back button — return to starting view */}
-      {phase === 'focused' && (
-        <button className="back-button" onClick={handleExit}>
+      {(phase === 'focused' || phase === 'tank-view' || phase === 'couch-view' || phase === 'psp-view' || phase === 'n3ds-view') && (
+        <button
+          className="back-button"
+          onClick={
+            phase === 'focused' ? handleExit
+            : phase === 'tank-view' ? handleTankExit
+            : phase === 'psp-view' ? handlePSPExit
+            : phase === 'n3ds-view' ? handle3DSExit
+            : handleCouchExit
+          }
+        >
           ← Back
         </button>
+      )}
+
+      {/* Exhibit description card */}
+      {phase === 'tank-view' && (
+        <div className="exhibit-card">
+          <h2 className="exhibit-title">Siege Tank</h2>
+          <p className="exhibit-desc">
+            StarCraft 2 is one of my all-time favorite games. I&apos;m a Terran main, and the Siege Tank
+            is hands down my favorite unit — nothing beats that satisfying <em>thunk</em> when it locks
+            into siege mode and starts raining shells. GG no re.
+          </p>
+          <span className="exhibit-credit">
+            Model by <a href="https://skfb.ly/oXJGR" target="_blank" rel="noopener noreferrer">Catholomew</a> · CC BY-NC 4.0
+          </span>
+        </div>
+      )}
+
+      {/* Couch view — nested Look Around */}
+      {phase === 'couch-view' && (
+        <div className="action-buttons" style={{ bottom: '6%' }}>
+          <button className="enter-button look-around-button" onClick={handleCouchLookAround}>
+            <span className="enter-button-text" data-text="Look around the Gaming Corner">Look around the Gaming Corner</span>
+          </button>
+        </div>
+      )}
+
+      {/* Couch sub-menu */}
+      {phase === 'couch-menu' && (
+        <div className="action-buttons">
+          <button className="enter-button" onClick={() => handleCouchMenuSelect('psp')}>
+            <span className="enter-button-text" data-text="Sony PSP">Sony PSP</span>
+          </button>
+          <button className="enter-button" onClick={() => handleCouchMenuSelect('n3ds')}>
+            <span className="enter-button-text" data-text="Nintendo 3DS XL">Nintendo 3DS XL</span>
+          </button>
+          <button className="enter-button look-around-button" onClick={handleCouchMenuBack}>
+            <span className="enter-button-text" data-text="← Back">← Back</span>
+          </button>
+        </div>
+      )}
+
+      {/* PSP exhibit card */}
+      {phase === 'psp-view' && (
+        <div className="exhibit-card">
+          <h2 className="exhibit-title">Sony PSP</h2>
+          <p className="exhibit-desc">
+            This thing was my <em>childhood</em>. Spent countless hours on GTA Vice City Stories and
+            Monster Hunter 2G / 3rd Portable — Long Sword main, the grind was real.
+            Oh, and of course it was jailbroken — shoutout
+            to the <em>Patapon save exploit</em> that made it all possible. Good times.
+          </p>
+          <span className="exhibit-credit">
+            Model by <a href="https://skfb.ly/6CXrr" target="_blank" rel="noopener noreferrer">Ilya Ostrovsky</a> · CC BY 4.0
+          </span>
+        </div>
+      )}
+
+      {/* 3DS exhibit card */}
+      {phase === 'n3ds-view' && (
+        <div className="exhibit-card">
+          <h2 className="exhibit-title">Nintendo 3DS XL</h2>
+          <p className="exhibit-desc">
+            Another Monster Hunter machine. Sunk <em>hundreds</em> of hours into MH4U and
+            MH Generations on this thing. The funny part? I had the 3D slider turned off the
+            <em> entire time</em> I owned it — never liked the 3D effect. Just give me the
+            gameplay.
+          </p>
+          <span className="exhibit-credit">
+            Model by <a href="https://skfb.ly/o6xpZ" target="_blank" rel="noopener noreferrer">Keita-sama</a> · CC BY 4.0
+          </span>
+        </div>
       )}
 
     </div>

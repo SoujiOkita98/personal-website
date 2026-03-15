@@ -113,6 +113,10 @@ Feel free to reach out — always down to chat.`,
   sketchfab.com/jackbaeten
   Licensed under CC BY
 
+  "Siege Tank Story - Starcraft 2" by Catholomew
+  https://skfb.ly/oXJGR
+  Licensed under CC BY-NC 4.0
+
   3D scene inspired by Henry Heffernan's Three.js portfolio.
   Henry, thank you for open-sourcing your project.
   I learned a lot from studying your code.`,
