@@ -61,6 +61,9 @@ src/
     ├── PlantModel.tsx        # Plant model
     ├── StudioEnvironment.tsx # Floor plane and studio lighting
     ├── SiegeTankModel.tsx    # Siege Tank 3D model (with animation)
+    ├── CouchScene.tsx        # Gaming Corner scene (couch, TV, bookshelf, PC setup)
+    ├── PSPModel.tsx          # Sony PSP 3D model
+    ├── Nintendo3DSModel.tsx  # Nintendo 3DS XL 3D model (blue→red shader)
     └── Terminal/
         ├── TerminalWindow.tsx  # Draggable, resizable window chrome
         ├── TerminalBody.tsx    # Terminal input/output and history
@@ -68,7 +71,10 @@ src/
 
 public/
 └── models/
-    └── siege_tank.glb        # Siege Tank GLB model file
+    ├── macbook_pro_m3.glb    # MacBook Pro GLB model
+    ├── siege_tank.glb        # Siege Tank GLB model
+    ├── sony_psp.glb          # Sony PSP GLB model
+    └── nintendo_3ds_xl.glb   # Nintendo 3DS XL GLB model
 ```
 
 ## Terminal Commands
@@ -303,7 +309,11 @@ Deployed on [Vercel](https://vercel.com). Push to `main` and Vercel handles the 
 
 ## Credits
 
+### 3D Models
+
 - **Siege Tank Story - Starcraft 2** by [Catholomew](https://skfb.ly/oXJGR) — Licensed under [CC BY-NC 4.0](http://creativecommons.org/licenses/by-nc/4.0/)
+- **Sony PSP** by [Ilya Ostrovsky](https://skfb.ly/6CXrr) — Licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)
+- **Nintendo 3DS XL** by [Keita-sama](https://skfb.ly/o6xpZ) — Licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)
 
 ## License
 
