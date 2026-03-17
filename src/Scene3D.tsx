@@ -852,7 +852,7 @@ export default function Scene3D() {
           <h2 className="exhibit-title">Sony PSP</h2>
           <p className="exhibit-desc">
             This thing was my <em>childhood</em>. Spent countless hours on GTA Vice City Stories and
-            Monster Hunter 2G / 3rd Portable — Long Sword main, the grind was real.
+            Monster Hunter 2G / 3rd Portable — Hammer and Bow main, the grind was real.
             Oh, and of course it was jailbroken — shoutout
             to the <em>Patapon save exploit</em> that made it all possible. Good times.
           </p>
