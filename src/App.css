@@ -1,7 +1,7 @@
 .desktop {
   width: 100%;
   height: 100%;
-  background: url('/wallpaper.jpg') center/cover no-repeat;
+  background: url('/wallpaper.webp') center/cover no-repeat;
   background-color: #1a1a2e;
   position: relative;
   display: flex;

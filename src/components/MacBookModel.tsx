@@ -35,7 +35,7 @@ export default function MacBookModel({
   const holeMat = useRef(new THREE.MeshBasicMaterial({ colorWrite: false }))
 
   // Load wallpaper texture for the static screen preview
-  const wallpaperTex = useTexture('/wallpaper.jpg')
+  const wallpaperTex = useTexture('/wallpaper.webp')
   const screenPreviewMat = useMemo(() => {
     wallpaperTex.colorSpace = THREE.SRGBColorSpace
     return new THREE.MeshBasicMaterial({ map: wallpaperTex })
@@ -271,7 +271,7 @@ export default function MacBookModel({
 }
 
 useGLTF.preload('/models/macbook_pro_m3.glb')
-useTexture.preload('/wallpaper.jpg')
+useTexture.preload('/wallpaper.webp')
 
 // ── Convex Hull — Andrew's monotone chain, O(n log n) ──
 function convexHull(points: [number, number][]): [number, number][] {

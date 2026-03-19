@@ -38,7 +38,7 @@ const TANK_ROTATION: [number, number, number] = [0, Math.PI * 0.6 - Math.PI / 2,
 // Couch scene placement (left of desk, ~9 o'clock)
 const COUCH_POSITION: [number, number, number] = [-2.5, 0, 0]
 const COUCH_ROTATION: [number, number, number] = [0, Math.PI * 0.3, 0]
-const MIN_LOADING_SCREEN_MS = 1800
+const MIN_LOADING_SCREEN_MS = 800
 const NAME_ASCII = String.raw`
    _____     __      _______ _   _
   / ____|   /\ \    / /_   _| \ | |
@@ -624,7 +624,7 @@ export default function Scene3D() {
 
       <Canvas
         camera={{ fov: adaptiveFov, near: 0.01, far: 100, position: [2.0, 1.8, 1.0] }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         shadows
         gl={{ antialias: true, alpha: true }}
         onCreated={({ gl }) => {
@@ -639,8 +639,8 @@ export default function Scene3D() {
           intensity={1.2}
           color="#ffffff"
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
           shadow-camera-left={-6}
           shadow-camera-right={6}
           shadow-camera-top={6}
