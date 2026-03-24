@@ -759,7 +759,7 @@ export default function Scene3D() {
             <span className="enter-button-text" data-text="Go to Desk">Go to Desk</span>
           </button>
           <button className="enter-button look-around-button" onClick={handleLookAround}>
-            <span className="enter-button-text" data-text="Look around">Look around</span>
+            <span className="enter-button-text" data-text="Explore Gallery">Explore Gallery</span>
           </button>
         </div>
       )}
@@ -786,7 +786,7 @@ export default function Scene3D() {
             <span className="enter-button-text" data-text="Go to Desk">Go to Desk</span>
           </button>
           <button className="enter-button look-around-button">
-            <span className="enter-button-text" data-text="Look around">Look around</span>
+            <span className="enter-button-text" data-text="Explore Gallery">Explore Gallery</span>
           </button>
         </div>
       )}
@@ -826,7 +826,7 @@ export default function Scene3D() {
       {phase === 'couch-view' && (
         <div className="action-buttons" style={{ bottom: '6%' }}>
           <button className="enter-button look-around-button" onClick={handleCouchLookAround}>
-            <span className="enter-button-text" data-text="Look around the Gaming Corner">Look around the Gaming Corner</span>
+            <span className="enter-button-text" data-text="Explore">Explore</span>
           </button>
         </div>
       )}
