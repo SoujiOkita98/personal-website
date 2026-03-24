@@ -26,7 +26,7 @@ npm run dev
 
 ## Deployment
 
-Deployed on [Vercel](https://vercel.com). Push to `main` and Vercel handles the rest.
+Deployed on [Cloudflare Pages](https://pages.cloudflare.com). Push to `main` and Cloudflare handles the rest.
 
 ## Credits
 
