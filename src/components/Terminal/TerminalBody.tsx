@@ -10,7 +10,12 @@ const WELCOME = `Welcome to guanjiazhu's terminal. Type 'help' to get started.`;
 
 const PROMPT = 'guanjiazhu@web ~ % ';
 
-export default function TerminalBody() {
+interface TerminalBodyProps {
+  onOpenBlog?: () => void;
+  onOpenZiwei?: () => void;
+}
+
+export default function TerminalBody({ onOpenBlog, onOpenZiwei }: TerminalBodyProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [input, setInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
@@ -76,6 +81,24 @@ export default function TerminalBody() {
 
       if (cmd === '') {
         setHistory((prev) => [...prev, { command: '', output: '' }]);
+        setInput('');
+        return;
+      }
+
+      if (cmd === 'blog') {
+        onOpenBlog?.();
+        setHistory((prev) => [...prev, { command: cmd, output: 'launching blog window...' }]);
+        setCommandHistory((prev) => [...prev, cmd]);
+        setHistoryIndex(-1);
+        setInput('');
+        return;
+      }
+
+      if (cmd === 'ziwei' || cmd === '紫微斗数') {
+        onOpenZiwei?.();
+        setHistory((prev) => [...prev, { command: cmd, output: 'opening 紫微斗数...' }]);
+        setCommandHistory((prev) => [...prev, cmd]);
+        setHistoryIndex(-1);
         setInput('');
         return;
       }

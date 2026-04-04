@@ -2,13 +2,18 @@ import { type ReactNode } from 'react';
 
 interface DesktopIconProps {
   label: string;
-  href: string;
   icon: ReactNode;
+  href?: string;
+  onClick?: () => void;
 }
 
-export default function DesktopIcon({ label, href, icon }: DesktopIconProps) {
+export default function DesktopIcon({ label, href, onClick, icon }: DesktopIconProps) {
   const handleDoubleClick = () => {
-    window.open(href, '_blank', 'noopener');
+    if (onClick) {
+      onClick();
+    } else if (href) {
+      window.open(href, '_blank', 'noopener');
+    }
   };
 
   return (

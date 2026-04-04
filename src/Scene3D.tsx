@@ -343,6 +343,9 @@ function LoadingOverlay() {
             ? `${loaded}/${total || '?'} assets • ${roundedProgress}%`
             : 'Click anywhere or press Enter to enter'}
         </p>
+        <a href="/blog" className="loading-blog-link" onClick={(e) => e.stopPropagation()}>
+          or go straight to my blog → /blog
+        </a>
       </div>
     </div>
   )
@@ -761,6 +764,7 @@ export default function Scene3D() {
           <button className="enter-button look-around-button" onClick={handleLookAround}>
             <span className="enter-button-text" data-text="Explore Gallery">Explore Gallery</span>
           </button>
+
         </div>
       )}
 

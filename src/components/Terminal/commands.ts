@@ -14,6 +14,8 @@ const COMMANDS: Record<string, () => CommandOutput> = {
   skills      What I know
   projects    Things I'm building
   contact     How to reach me
+  blog        Open my blog
+  ziwei       Open 紫微斗数 fortune teller
   credits     Acknowledgments
   neofetch    System info
   clear       Clear the terminal

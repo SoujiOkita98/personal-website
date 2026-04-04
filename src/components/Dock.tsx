@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { Folder, TerminalSquare, Github, Mail } from 'lucide-react';
+import { Folder, TerminalSquare, Github, Mail, BookOpen } from 'lucide-react';
 
 interface DockItemData {
   icon: ReactNode;
@@ -13,12 +13,15 @@ interface DockItemData {
 interface DockProps {
   onTerminalClick: () => void;
   terminalOpen: boolean;
+  onBlogClick: () => void;
+  blogOpen: boolean;
 }
 
-export default function Dock({ onTerminalClick, terminalOpen }: DockProps) {
+export default function Dock({ onTerminalClick, terminalOpen, onBlogClick, blogOpen }: DockProps) {
   const DOCK_ITEMS: DockItemData[] = [
     { icon: <Folder size={28} />, label: 'Finder', color: '#2196f3', id: 'finder' },
     { icon: <TerminalSquare size={28} />, label: 'Terminal', active: terminalOpen, color: '#333', id: 'terminal' },
+    { icon: <BookOpen size={28} />, label: 'Blog', active: blogOpen, color: '#555', id: 'blog' },
   ];
 
   const DOCK_LINKS: DockItemData[] = [
@@ -27,10 +30,8 @@ export default function Dock({ onTerminalClick, terminalOpen }: DockProps) {
   ];
 
   const handleClick = (item: DockItemData) => {
-    if (item.id === 'terminal') {
-      onTerminalClick();
-      return;
-    }
+    if (item.id === 'terminal') { onTerminalClick(); return; }
+    if (item.id === 'blog') { onBlogClick(); return; }
     if (item.href) {
       window.open(item.href, '_blank', 'noopener');
     }

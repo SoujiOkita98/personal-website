@@ -4,6 +4,7 @@ interface TerminalWindowProps {
   children: ReactNode;
   onClose: () => void;
   onMinimize: () => void;
+  title?: string;
 }
 
 type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
@@ -11,7 +12,7 @@ type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 const MIN_WIDTH = 360;
 const MIN_HEIGHT = 200;
 
-export default function TerminalWindow({ children, onClose, onMinimize }: TerminalWindowProps) {
+export default function TerminalWindow({ children, onClose, onMinimize, title = 'guanjiazhu — zsh' }: TerminalWindowProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [winSize, setWinSize] = useState({ width: 0, height: 0 });
   const [centered, setCentered] = useState(true);
@@ -181,7 +182,7 @@ export default function TerminalWindow({ children, onClose, onMinimize }: Termin
             <div className="traffic-light yellow" onClick={onMinimize} />
             <div className="traffic-light green" onClick={handleFullscreen} />
           </div>
-          <span className="terminal-title-text">guanjiazhu — zsh</span>
+          <span className="terminal-title-text">{title}</span>
         </div>
         {children}
       </div>

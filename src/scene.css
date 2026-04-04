@@ -275,6 +275,32 @@
   color: rgba(250, 250, 247, 0.7);
 }
 
+.blog-nav-button {
+  text-decoration: none;
+}
+
+.blog-nav-button .enter-button-text {
+  font-size: clamp(14px, 2.4vw, 22px);
+  color: rgba(250, 250, 247, 0.45);
+}
+
+/* Loading screen blog link */
+.loading-blog-link {
+  display: block;
+  margin-top: 20px;
+  font-family: 'Geist Pixel Square', monospace;
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  color: rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+  text-align: center;
+  transition: color 0.2s;
+}
+
+.loading-blog-link:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
 /* Html component screen wrapper */
 .screen-html-wrapper {
   transform-origin: center center;
