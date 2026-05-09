@@ -10,6 +10,7 @@ import DeskSetup from './components/DeskSetup'
 import PlantModel from './components/PlantModel'
 import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
 import CouchScene from './components/CouchScene'
+import { emitTyping, pulseKey, mapPhysicalKeyToId } from './components/Terminal/typingStore'
 import './scene.css'
 
 // MacBook position relative to desk group
@@ -591,6 +592,52 @@ export default function Scene3D() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [handleExit, handleTankExit, handleCouchExit, handlePSPExit, handle3DSExit, phase])
+
+  // ── Easter egg: global typing pipeline ──
+  // When the terminal input field doesn't have focus (e.g. user is in
+  // explore mode, lid still 3D), physical keystrokes route into the same
+  // typing store that the 3D virtual keyboard uses. Both also trigger
+  // a visual pulse on the matching 3D key.
+  // Suggested by 任思邈 Ben Ren — Scam.ai.
+  useEffect(() => {
+    const onTypeKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return // existing ESC path handles this
+
+      const active = document.activeElement as HTMLElement | null
+      const isTerminalFocused = active?.classList.contains('terminal-input')
+      // If the terminal input is focused, TerminalBody's own onKeyDown
+      // owns this event. Don't double-handle it here.
+      if (isTerminalFocused) return
+
+      const id = mapPhysicalKeyToId(e)
+      if (id) pulseKey(id)
+
+      // Don't hijack browser shortcuts (cmd-R, ctrl-c, etc).
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
+      // Emit the typing event for non-focused state.
+      const k = e.key
+      if (k === 'Enter') {
+        emitTyping({ type: 'enter' })
+      } else if (k === 'Backspace') {
+        emitTyping({ type: 'backspace' })
+      } else if (k === 'ArrowUp') {
+        emitTyping({ type: 'arrowup' })
+      } else if (k === 'ArrowDown') {
+        emitTyping({ type: 'arrowdown' })
+      } else if (k === ' ') {
+        emitTyping({ type: 'char', char: ' ' })
+        e.preventDefault() // prevent page scroll
+      } else if (k === 'Tab') {
+        emitTyping({ type: 'char', char: '\t' })
+        e.preventDefault()
+      } else if (k.length === 1) {
+        emitTyping({ type: 'char', char: k })
+      }
+    }
+    window.addEventListener('keydown', onTypeKeyDown)
+    return () => window.removeEventListener('keydown', onTypeKeyDown)
+  }, [])
 
   return (
     <div className="scene-container">

@@ -4,6 +4,8 @@ import * as THREE from 'three'
 import { useGLTF, Html, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import App from '../App'
+import MacBookKeyboard from './MacBookKeyboard'
+import { subscribeTyping } from './Terminal/typingStore'
 
 interface MacBookModelProps {
   position?: [number, number, number]
@@ -16,6 +18,16 @@ const MODEL_SCALE = 0.02
 
 // Meshes that must become transparent "holes" for the occlusion technique.
 const SCREEN_HOLE_MESHES = new Set(['Object_123', 'Object_129'])
+
+// ── Virtual keyboard placement (MacBook-local coords) ──
+// Hand-tuned to overlay the 3D model's keyboard area. The CSS keyboard is
+// 1450×575 px and laid flat with rotation [-π/2, 0, 0] so the function row
+// sits near the hinge and the space bar sits near the palm rest.
+const KB_LOCAL_POSITION: [number, number, number] = [0, 0.022, -0.045]
+const KB_LOCAL_ROTATION: [number, number, number] = [-Math.PI / 2, 0, 0]
+// distanceFactor maps CSS pixels → scene units. Tuned so 1450 px ≈ keyboard
+// width on the model (~27.5 cm * MODEL_SCALE = 0.55 scene units).
+const KB_DISTANCE_FACTOR = 0.038
 
 export default function MacBookModel({
   position = [0, 0, 0],
@@ -165,9 +177,20 @@ export default function MacBookModel({
     return () => cancelAnimationFrame(rafId)
   }, [scene])
 
+  // ── Track whether the user has typed at least once ──
+  // (Easter egg: typing on the virtual keyboard or physical keyboard turns on
+  // the terminal screen even from explore distance — Ben's "震撼" condition.)
+  const [hasTyped, setHasTyped] = useState(false)
+  useEffect(() => {
+    if (hasTyped) return
+    const unsubscribe = subscribeTyping(() => setHasTyped(true))
+    return unsubscribe
+  }, [hasTyped])
+
   // ── Toggle occlusion hole on/off based on phase ──
-  // Only show live HTML when fully focused (camera locked) — no floating during zoom
-  const showHtml = phase === 'focused'
+  // Show live HTML when fully focused (camera locked) OR after the user has
+  // typed at least once (so the easter egg keyboard stays alive in explore).
+  const showHtml = phase === 'focused' || hasTyped
   useEffect(() => {
     for (const { mesh, origMat } of holeMeshesRef.current) {
       if (showHtml) {
@@ -239,6 +262,14 @@ export default function MacBookModel({
   return (
     <group ref={groupRef} position={position}>
       <primitive object={scene} scale={MODEL_SCALE} />
+
+      {/* Virtual ANSI keyboard — clickable, animates on physical typing.
+          Easter egg requested by 任思邈 Ben Ren (Scam.ai). */}
+      <MacBookKeyboard
+        position={KB_LOCAL_POSITION}
+        rotation={KB_LOCAL_ROTATION}
+        distanceFactor={KB_DISTANCE_FACTOR}
+      />
 
       {screenData && showHtml && (
         <Html
