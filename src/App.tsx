@@ -17,7 +17,7 @@ function App() {
       <div className="desktop-content">
         <div className="desktop-icons">
           <DesktopIcon
-            label="紫微斗数"
+            label="Fortune Teller"
             href="https://ziweidoushu-k-line.vercel.app/"
             icon={
               <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
