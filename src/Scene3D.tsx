@@ -272,18 +272,21 @@ function LoadingOverlay() {
   const { active, progress, loaded, total } = useProgress()
   const [dismissed, setDismissed] = useState(false)
   const [readyToEnter, setReadyToEnter] = useState(false)
-  const mountedAtRef = useRef(typeof performance !== 'undefined' ? performance.now() : Date.now())
+  const mountedAtRef = useRef(0)
+  const canDismiss = readyToEnter && !active
 
   useEffect(() => {
-    if (active) {
-      setDismissed(false)
-      setReadyToEnter(false)
-      return
-    }
+    mountedAtRef.current = performance.now()
+  }, [])
+
+  useEffect(() => {
+    if (dismissed) return
+
+    if (active) return
 
     if (total === 0) return
 
-    const elapsed = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - mountedAtRef.current
+    const elapsed = performance.now() - mountedAtRef.current
     const delay = Math.max(0, MIN_LOADING_SCREEN_MS - elapsed)
 
     const timer = window.setTimeout(() => {
@@ -291,37 +294,42 @@ function LoadingOverlay() {
     }, delay)
 
     return () => window.clearTimeout(timer)
-  }, [active, total])
+  }, [active, dismissed, total])
+
+  const dismiss = useCallback(() => {
+    if (!canDismiss || dismissed) return
+    setDismissed(true)
+  }, [canDismiss, dismissed])
 
   useEffect(() => {
-    if (!readyToEnter || dismissed) return
+    if (!canDismiss || dismissed) return
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
         event.preventDefault()
-        setDismissed(true)
+        dismiss()
       }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [readyToEnter, dismissed])
+  }, [canDismiss, dismiss, dismissed])
 
   if (dismissed) return null
 
   const roundedProgress = total > 0 ? Math.min(100, Math.round(progress)) : 0
   const statusLabel = active
     ? `Loading scene assets ${roundedProgress}%`
-    : readyToEnter
+    : canDismiss
       ? 'Scene ready. Press Enter or click to enter.'
       : 'Preparing scene'
 
   return (
     <div
-      className={`loading-screen${readyToEnter ? ' loading-screen-ready' : ''}`}
+      className={`loading-screen${canDismiss ? ' loading-screen-ready' : ''}`}
       aria-live="polite"
       aria-label={statusLabel}
-      onClick={readyToEnter ? () => setDismissed(true) : undefined}
+      onClick={canDismiss ? dismiss : undefined}
     >
       <div className="loading-panel">
         <p className="loading-eyebrow">gavinzhu.com</p>
@@ -356,6 +364,12 @@ type Phase = 'explore' | 'zooming' | 'focused' | 'menu' | 'tank-zooming' | 'tank
 export default function Scene3D() {
   const [phase, setPhase] = useState<Phase>('explore')
   const [adaptiveFov, setAdaptiveFov] = useState(BASE_FOV)
+  const [galleryRequested, setGalleryRequested] = useState(false)
+  const [tankReady, setTankReady] = useState(false)
+  const [couchReady, setCouchReady] = useState(false)
+  const [devicesRequested, setDevicesRequested] = useState(false)
+  const [pspReady, setPSPReady] = useState(false)
+  const [n3dsReady, set3DSReady] = useState(false)
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null)
   const screenPortalRef = useRef<HTMLDivElement>(null)
   const tankCamRef = useRef<{ target: [number, number, number]; camPos: [number, number, number] } | null>(null)
@@ -376,6 +390,7 @@ export default function Scene3D() {
     const w = window as unknown as Record<string, unknown>
     w.__tankCamTarget = target
     w.__tankCamPos = camPos
+    setTankReady(true)
   }, [])
 
   const handleCouchBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
@@ -391,6 +406,7 @@ export default function Scene3D() {
     const w = window as unknown as Record<string, unknown>
     w.__couchCamTarget = target
     w.__couchCamPos = camPos
+    setCouchReady(true)
   }, [])
 
   const handlePSPBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
@@ -405,6 +421,7 @@ export default function Scene3D() {
     const w = window as unknown as Record<string, unknown>
     w.__pspCamTarget = target
     w.__pspCamPos = camPos
+    setPSPReady(true)
   }, [])
 
   const handle3DSBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
@@ -419,7 +436,11 @@ export default function Scene3D() {
     const w = window as unknown as Record<string, unknown>
     w.__n3dsCamTarget = target
     w.__n3dsCamPos = camPos
+    set3DSReady(true)
   }, [])
+
+  const galleryReady = tankReady && couchReady
+  const devicesReady = pspReady && n3dsReady
 
   // Keep camera framing adaptive to viewport shape, but ignore keyboard-only viewport changes.
   useEffect(() => {
@@ -477,15 +498,19 @@ export default function Scene3D() {
   // ── Tank handlers ──
   const handleLookAround = () => {
     if (phase !== 'explore') return
+    setGalleryRequested(true)
     setPhase('menu')
   }
 
   const handleMenuSelect = (destination: string) => {
+    if (!galleryReady) return
+
     if (destination === 'tank') {
       setPhase('tank-zooming')
       const zoom = (window as unknown as Record<string, () => void>).__zoomToTank
       if (zoom) zoom()
     } else if (destination === 'couch') {
+      setDevicesRequested(true)
       setPhase('couch-zooming')
       const zoom = (window as unknown as Record<string, () => void>).__zoomToCouch
       if (zoom) zoom()
@@ -696,36 +721,39 @@ export default function Scene3D() {
           <StationWagon position={[-0.55, 0.742, -0.15]} />
         </group>
 
-        {/* Siege Tank */}
-        <SiegeTankModel
-          position={TANK_POSITION}
-          rotation={TANK_ROTATION}
-          shouldSiege={phase === 'tank-view'}
-          onBoundsReady={handleTankBounds}
-        />
-        {/* Tank lighting */}
-        <pointLight
-          position={[-3, 8, -6]}
-          intensity={8}
-          distance={20}
-          color="#ffffff"
-        />
+        {galleryRequested && (
+          <Suspense fallback={null}>
+            {/* Gallery assets are requested only after the visitor chooses to
+                explore, so they do not compete with the first desk load. */}
+            <SiegeTankModel
+              position={TANK_POSITION}
+              rotation={TANK_ROTATION}
+              shouldSiege={phase === 'tank-view'}
+              onBoundsReady={handleTankBounds}
+            />
+            <pointLight
+              position={[-3, 8, -6]}
+              intensity={8}
+              distance={20}
+              color="#ffffff"
+            />
 
-        {/* Couch gaming scene */}
-        <CouchScene
-          position={COUCH_POSITION}
-          rotation={COUCH_ROTATION}
-          onBoundsReady={handleCouchBounds}
-          onPSPBoundsReady={handlePSPBounds}
-          on3DSBoundsReady={handle3DSBounds}
-        />
-        {/* Couch area warm lighting */}
-        <pointLight
-          position={[-2.5, 2, 0]}
-          intensity={5}
-          distance={8}
-          color="#ffe4b5"
-        />
+            <CouchScene
+              position={COUCH_POSITION}
+              rotation={COUCH_ROTATION}
+              loadDevices={devicesRequested}
+              onBoundsReady={handleCouchBounds}
+              onPSPBoundsReady={handlePSPBounds}
+              on3DSBoundsReady={handle3DSBounds}
+            />
+            <pointLight
+              position={[-2.5, 2, 0]}
+              intensity={5}
+              distance={8}
+              color="#ffe4b5"
+            />
+          </Suspense>
+        )}
 
         <OrbitControls
           ref={controlsRef}
@@ -771,12 +799,18 @@ export default function Scene3D() {
       {/* Destination menu */}
       {phase === 'menu' && (
         <div className="action-buttons">
-          <button className="enter-button" onClick={() => handleMenuSelect('tank')}>
-            <span className="enter-button-text" data-text="Siege Tank">Siege Tank</span>
-          </button>
-          <button className="enter-button" onClick={() => handleMenuSelect('couch')}>
-            <span className="enter-button-text" data-text="Gaming Corner">Gaming Corner</span>
-          </button>
+          {galleryReady ? (
+            <>
+              <button className="enter-button" onClick={() => handleMenuSelect('tank')}>
+                <span className="enter-button-text" data-text="Siege Tank">Siege Tank</span>
+              </button>
+              <button className="enter-button" onClick={() => handleMenuSelect('couch')}>
+                <span className="enter-button-text" data-text="Gaming Corner">Gaming Corner</span>
+              </button>
+            </>
+          ) : (
+            <p className="gallery-loading" role="status">Loading gallery…</p>
+          )}
           <button className="enter-button look-around-button" onClick={handleMenuBack}>
             <span className="enter-button-text" data-text="← Back">← Back</span>
           </button>
@@ -838,12 +872,18 @@ export default function Scene3D() {
       {/* Couch sub-menu */}
       {phase === 'couch-menu' && (
         <div className="action-buttons">
-          <button className="enter-button" onClick={() => handleCouchMenuSelect('psp')}>
-            <span className="enter-button-text" data-text="Sony PSP">Sony PSP</span>
-          </button>
-          <button className="enter-button" onClick={() => handleCouchMenuSelect('n3ds')}>
-            <span className="enter-button-text" data-text="Nintendo 3DS XL">Nintendo 3DS XL</span>
-          </button>
+          {devicesReady ? (
+            <>
+              <button className="enter-button" onClick={() => handleCouchMenuSelect('psp')}>
+                <span className="enter-button-text" data-text="Sony PSP">Sony PSP</span>
+              </button>
+              <button className="enter-button" onClick={() => handleCouchMenuSelect('n3ds')}>
+                <span className="enter-button-text" data-text="Nintendo 3DS XL">Nintendo 3DS XL</span>
+              </button>
+            </>
+          ) : (
+            <p className="gallery-loading" role="status">Loading devices…</p>
+          )}
           <button className="enter-button look-around-button" onClick={handleCouchMenuBack}>
             <span className="enter-button-text" data-text="← Back">← Back</span>
           </button>

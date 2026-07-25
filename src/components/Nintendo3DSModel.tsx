@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
-const MODEL_PATH = '/models/nintendo_3ds_xl.glb'
+const MODEL_PATH = '/models/nintendo_3ds_xl.glb?v=bf977fc5'
 const MODEL_SCALE = 0.008
 
 interface Nintendo3DSModelProps {
@@ -75,5 +75,3 @@ export default function Nintendo3DSModel({
     </group>
   )
 }
-
-useGLTF.preload(MODEL_PATH, false, true)

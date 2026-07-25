@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Geist Pixel Square';
-  src: url('/fonts/GeistPixel-Square.woff2') format('woff2');
+  src: url('/fonts/GeistPixel-Square.woff2?v=232cae2c') format('woff2');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'Geist Pixel Line';
-  src: url('/fonts/GeistPixel-Line.woff2') format('woff2');
+  src: url('/fonts/GeistPixel-Line.woff2?v=b4ff341d') format('woff2');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: 'Geist Pixel Grid';
-  src: url('/fonts/GeistPixel-Grid.woff2') format('woff2');
+  src: url('/fonts/GeistPixel-Grid.woff2?v=9cfd59fe') format('woff2');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -24,7 +24,7 @@
 
 @font-face {
   font-family: 'Geist Pixel Triangle';
-  src: url('/fonts/GeistPixel-Triangle.woff2') format('woff2');
+  src: url('/fonts/GeistPixel-Triangle.woff2?v=c6017a87') format('woff2');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -32,7 +32,7 @@
 
 @font-face {
   font-family: 'Geist Pixel Circle';
-  src: url('/fonts/GeistPixel-Circle.woff2') format('woff2');
+  src: url('/fonts/GeistPixel-Circle.woff2?v=100da9fb') format('woff2');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -231,6 +231,15 @@
 .action-buttons.fade-out {
   opacity: 0;
   pointer-events: none;
+}
+
+.gallery-loading {
+  margin: 0 0 4px;
+  color: rgba(250, 250, 247, 0.9);
+  font-family: 'Geist Pixel Square', 'Geist Pixel Line', 'Courier New', monospace;
+  font-size: clamp(18px, 3vw, 30px);
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 /* ===== ENTER BUTTON ===== */
