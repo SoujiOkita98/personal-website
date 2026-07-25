@@ -15,10 +15,23 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'three-core': ['three'],
-          'three-fiber': ['@react-three/fiber', '@react-three/drei'],
-          'gsap': ['gsap'],
+        manualChunks(id) {
+          const normalizedId = id.split(path.sep).join('/')
+
+          if (normalizedId.includes('vite/preload-helper')) return 'react-vendor'
+          if (normalizedId.includes('/node_modules/@react-three/')) return 'three-fiber'
+          if (normalizedId.includes('/node_modules/three/')) return 'three-core'
+          if (normalizedId.includes('/node_modules/gsap/')) return 'gsap'
+
+          if (
+            normalizedId.includes('/node_modules/react/') ||
+            normalizedId.includes('/node_modules/react-dom/') ||
+            normalizedId.includes('/node_modules/react-router/') ||
+            normalizedId.includes('/node_modules/react-router-dom/') ||
+            normalizedId.includes('/node_modules/scheduler/')
+          ) {
+            return 'react-vendor'
+          }
         },
       },
     },

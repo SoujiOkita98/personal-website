@@ -5,6 +5,9 @@ import { useGLTF, Html, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import App from '../App'
 
+const MODEL_PATH = '/models/macbook_pro_m3.glb?v=9e5177f8'
+const WALLPAPER_PATH = '/wallpaper.webp?v=9308238a'
+
 interface MacBookModelProps {
   position?: [number, number, number]
   screenPortal?: RefObject<HTMLDivElement | null>
@@ -22,7 +25,7 @@ export default function MacBookModel({
   screenPortal,
   phase = 'explore',
 }: MacBookModelProps) {
-  const { scene } = useGLTF('/models/macbook_pro_m3.glb')
+  const { scene } = useGLTF(MODEL_PATH)
   const groupRef = useRef<THREE.Group>(null)
   const { camera, size } = useThree()
 
@@ -35,10 +38,12 @@ export default function MacBookModel({
   const holeMat = useRef(new THREE.MeshBasicMaterial({ colorWrite: false }))
 
   // Load wallpaper texture for the static screen preview
-  const wallpaperTex = useTexture('/wallpaper.webp')
+  const wallpaperTex = useTexture(WALLPAPER_PATH)
   const screenPreviewMat = useMemo(() => {
-    wallpaperTex.colorSpace = THREE.SRGBColorSpace
-    return new THREE.MeshBasicMaterial({ map: wallpaperTex })
+    const screenTexture = wallpaperTex.clone()
+    screenTexture.colorSpace = THREE.SRGBColorSpace
+    screenTexture.needsUpdate = true
+    return new THREE.MeshBasicMaterial({ map: screenTexture })
   }, [wallpaperTex])
 
   const [screenData, setScreenData] = useState<{
@@ -163,11 +168,13 @@ export default function MacBookModel({
     })
 
     return () => cancelAnimationFrame(rafId)
-  }, [scene])
+  }, [scene, screenPreviewMat])
 
   // ── Toggle occlusion hole on/off based on phase ──
   // Only show live HTML when fully focused (camera locked) — no floating during zoom
   const showHtml = phase === 'focused'
+  /* eslint-disable react-hooks/immutability -- Three objects and the portal DOM
+     are imperative integration surfaces owned by this component. */
   useEffect(() => {
     for (const { mesh, origMat } of holeMeshesRef.current) {
       if (showHtml) {
@@ -229,6 +236,7 @@ export default function MacBookModel({
       lastClip.current = clip
     }
   })
+  /* eslint-enable react-hooks/immutability */
 
   // Intentionally oversize the Html so it ALWAYS covers the full clip area.
   // The clip-path trims the overflow — no trial-and-error distanceFactor needed.
@@ -270,8 +278,8 @@ export default function MacBookModel({
   )
 }
 
-useGLTF.preload('/models/macbook_pro_m3.glb')
-useTexture.preload('/wallpaper.webp')
+useGLTF.preload(MODEL_PATH)
+useTexture.preload(WALLPAPER_PATH)
 
 // ── Convex Hull — Andrew's monotone chain, O(n log n) ──
 function convexHull(points: [number, number][]): [number, number][] {

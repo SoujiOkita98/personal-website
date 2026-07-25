@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
-const MODEL_PATH = '/models/sony_psp.glb'
+const MODEL_PATH = '/models/sony_psp.glb?v=a9d7013b'
 const MODEL_SCALE = 0.008
 
 interface PSPModelProps {
@@ -50,5 +50,3 @@ export default function PSPModel({
     </group>
   )
 }
-
-useGLTF.preload(MODEL_PATH, false, true)

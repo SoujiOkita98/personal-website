@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 
-const MODEL_PATH = '/models/siege_tank.glb'
+const MODEL_PATH = '/models/siege_tank.glb?v=3f0a0019'
 const MODEL_SCALE = 3.0
 
 interface SiegeTankModelProps {
@@ -85,6 +85,8 @@ export default function SiegeTankModel({
       const siegeAction = actions['Armature_Stand Work Start_full']
       if (siegeAction) {
         siegeAction.reset()
+        // AnimationAction is intentionally stateful; drei owns the action map.
+        // eslint-disable-next-line react-hooks/immutability
         siegeAction.clampWhenFinished = true
         siegeAction.setLoop(THREE.LoopOnce, 1)
         siegeAction.play()
@@ -110,5 +112,3 @@ export default function SiegeTankModel({
     </group>
   )
 }
-
-useGLTF.preload(MODEL_PATH)

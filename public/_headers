@@ -1,0 +1,22 @@
+# Vite fingerprints generated bundles, so browsers can keep them without
+# revalidating on every visit. A new deploy creates new URLs.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Model URLs include a content-version query in the app. Update the version
+# whenever replacing a model file.
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/wallpaper.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+# The shell must always be checked so it can point at the newest bundles.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
