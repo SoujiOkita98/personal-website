@@ -16,9 +16,10 @@ const html = await read('dist/index.html')
 const headers = await read('dist/_headers')
 
 assert(
-  html.includes('class="initial-shell"') &&
-    html.includes('Starting the interactive desk'),
-  'The static first-load shell is missing from dist/index.html.',
+  !html.includes('initial-shell') &&
+    !html.includes('Starting the interactive desk') &&
+    !html.includes('background: #0b0b0b'),
+  'The removed startup screen has returned to dist/index.html.',
 )
 
 const modulePreloads = [...html.matchAll(/rel="modulepreload"[^>]+href="([^"]+)"/g)]
@@ -26,7 +27,7 @@ const modulePreloads = [...html.matchAll(/rel="modulepreload"[^>]+href="([^"]+)"
 
 assert(
   !modulePreloads.some((href) => href.includes('three-core') || href.includes('three-fiber')),
-  'Three.js is being preloaded before the visible first-load shell.',
+  'Three.js is being preloaded before the interactive scene is requested.',
 )
 
 const entryMatch = html.match(/<script type="module" crossorigin src="([^"]+)"/)

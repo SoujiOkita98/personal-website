@@ -3,10 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Blog from './pages/Blog'
-import {
-  InitialLoadFallback,
-  SceneLoadBoundary,
-} from './components/InitialLoadFallback'
+import { SceneLoadBoundary } from './components/SceneLoadBoundary'
 import { clearSceneRetryMarker, markSceneRetry } from './sceneRetry'
 
 const Scene3D = lazy(async () => {
@@ -34,7 +31,7 @@ createRoot(document.getElementById('root')!).render(
           path="/"
           element={
             <SceneLoadBoundary>
-              <Suspense fallback={<InitialLoadFallback />}>
+              <Suspense fallback={null}>
                 <Scene3D />
               </Suspense>
             </SceneLoadBoundary>
