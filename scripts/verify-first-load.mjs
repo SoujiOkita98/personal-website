@@ -76,6 +76,16 @@ assert(
   'Production cache rules are incomplete.',
 )
 
+const sceneSource = await read('src/Scene3D.tsx')
+const couchSource = await read('src/components/CouchScene.tsx')
+assert(
+  sceneSource.includes('<SiegeTankModel') &&
+    sceneSource.includes('<CouchScene') &&
+    !sceneSource.includes('galleryRequested') &&
+    !couchSource.includes('loadDevices'),
+  'The complete gallery is no longer part of the initial scene.',
+)
+
 for (const modelFile of [
   'src/components/SiegeTankModel.tsx',
   'src/components/PSPModel.tsx',
@@ -84,7 +94,7 @@ for (const modelFile of [
   const source = await read(modelFile)
   assert(
     !source.includes('useGLTF.preload'),
-    `${modelFile} eagerly preloads a non-critical gallery model.`,
+    `${modelFile} starts loading outside the rendered scene lifecycle.`,
   )
 }
 

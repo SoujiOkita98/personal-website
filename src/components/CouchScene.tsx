@@ -1,4 +1,4 @@
-import { Suspense, useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import * as THREE from 'three'
 import PSPModel from './PSPModel'
 import Nintendo3DSModel from './Nintendo3DSModel'
@@ -6,7 +6,6 @@ import Nintendo3DSModel from './Nintendo3DSModel'
 interface CouchSceneProps {
   position?: [number, number, number]
   rotation?: [number, number, number]
-  loadDevices?: boolean
   onBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
   onPSPBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
   on3DSBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
@@ -577,7 +576,6 @@ function Rug() {
 export default function CouchScene({
   position = [0, 0, 0],
   rotation = [0, 0, 0],
-  loadDevices = false,
   onBoundsReady,
   onPSPBoundsReady,
   on3DSBoundsReady,
@@ -606,22 +604,18 @@ export default function CouchScene({
       {/* Couch area — center */}
       <Couch />
       <SideTable position={[1.2, 0, 0.1]} />
-      {loadDevices && (
-        <Suspense fallback={null}>
-          {/* PSP on the side table (left side) */}
-          <PSPModel
-            position={[1.08, 0.66, 0.1]}
-            rotation={[0, -0.5, 0]}
-            onBoundsReady={onPSPBoundsReady}
-          />
-          {/* 3DS on the side table (right side) */}
-          <Nintendo3DSModel
-            position={[1.35, 0.66, 0.1]}
-            rotation={[0, -0.3, 0]}
-            onBoundsReady={on3DSBoundsReady}
-          />
-        </Suspense>
-      )}
+      {/* PSP on the side table (left side) */}
+      <PSPModel
+        position={[1.08, 0.66, 0.1]}
+        rotation={[0, -0.5, 0]}
+        onBoundsReady={onPSPBoundsReady}
+      />
+      {/* 3DS on the side table (right side) */}
+      <Nintendo3DSModel
+        position={[1.35, 0.66, 0.1]}
+        rotation={[0, -0.3, 0]}
+        onBoundsReady={on3DSBoundsReady}
+      />
       {/* TV + console in front of the couch — further away */}
       <TVSetup position={[0, 0, 1.5]} />
       {/* Full bookshelf behind the couch, on the ground */}
