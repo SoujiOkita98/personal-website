@@ -22,6 +22,26 @@ assert(
   'The removed startup screen has returned to dist/index.html.',
 )
 
+assert(
+  html.includes('name="theme-color" content="#f7f7f4"') &&
+    html.includes('radial-gradient(circle at top, #fff, #f7f7f4 58%, #edede8 100%)'),
+  'The inline first-frame background no longer matches the existing loading experience.',
+)
+
+const stylesheetMatch = html.match(
+  /<link rel="stylesheet" crossorigin href="([^"]+)"/,
+)
+assert(stylesheetMatch, 'The production stylesheet could not be found.')
+
+const criticalCss = await read(
+  path.join('dist', stylesheetMatch[1].replace(/^\//, '')),
+)
+assert(
+  criticalCss.includes('.loading-screen') &&
+    criticalCss.includes('.loading-screen-exiting'),
+  'The existing loading experience is no longer available in the critical stylesheet.',
+)
+
 const modulePreloads = [...html.matchAll(/rel="modulepreload"[^>]+href="([^"]+)"/g)]
   .map((match) => match[1])
 

@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect, Suspense } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Environment, ContactShadows, Lightformer, useProgress } from '@react-three/drei'
 import * as THREE from 'three'
 import gsap from 'gsap'
@@ -10,6 +10,7 @@ import DeskSetup from './components/DeskSetup'
 import PlantModel from './components/PlantModel'
 import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
 import CouchScene from './components/CouchScene'
+import type { SceneLoadState } from './components/SceneLoadingOverlay'
 import './scene.css'
 
 // MacBook position relative to desk group
@@ -38,30 +39,6 @@ const TANK_ROTATION: [number, number, number] = [0, Math.PI * 0.6 - Math.PI / 2,
 // Couch scene placement (left of desk, ~9 o'clock)
 const COUCH_POSITION: [number, number, number] = [-2.5, 0, 0]
 const COUCH_ROTATION: [number, number, number] = [0, Math.PI * 0.3, 0]
-const MIN_LOADING_SCREEN_MS = 800
-const NAME_ASCII = String.raw`
-   _____     __      _______ _   _
-  / ____|   /\ \    / /_   _| \ | |
- | |  __   /  \ \  / /  | | |  \| |
- | | |_ | / /\ \ \/ /   | | | . ' |
- | |__| |/ ____ \  /   _| |_| |\  |
-  \_____/_/    \_\/   |_____|_| \_|
-
-   _____ _    _         _   _      _ _____
-  / ____| |  | |  /\   | \ | |    | |_   _|   /\
- | |  __| |  | | /  \  |  \| |    | | | |    /  \
- | | |_ | |  | |/ /\ \ | . ' |_   | | | |   / /\ \
- | |__| | |__| / ____ \| |\  | |__| |_| |_ / ____ \
-  \_____|\____/_/    \_\_| \_|\____/|_____/_/    \_\
-
-  _______    _ _    _
- |___  / |  | | |  | |
-    / /| |__| | |  | |
-   / / |  __  | |  | |
-  / /__| |  | | |__| |
- /_____|_|  |_|\____/
-`
-
 function getAdaptiveFov(aspect: number) {
   if (aspect <= 0) return BASE_FOV
 
@@ -268,100 +245,44 @@ function CameraAnimator({
   return null
 }
 
-function LoadingOverlay() {
+function SceneLoadStateReporter({
+  onLoadStateChange,
+}: {
+  onLoadStateChange: (state: SceneLoadState) => void
+}) {
   const { active, progress, loaded, total } = useProgress()
-  const [dismissed, setDismissed] = useState(false)
-  const [readyToEnter, setReadyToEnter] = useState(false)
-  const mountedAtRef = useRef(0)
-  const canDismiss = readyToEnter && !active
 
   useEffect(() => {
-    mountedAtRef.current = performance.now()
-  }, [])
+    onLoadStateChange({ active, progress, loaded, total })
+  }, [active, loaded, onLoadStateChange, progress, total])
 
-  useEffect(() => {
-    if (dismissed) return
+  return null
+}
 
-    if (active) return
+function FirstFrameReporter({ onFirstFrame }: { onFirstFrame: () => void }) {
+  const { active, total } = useProgress()
+  const reportedFirstFrameRef = useRef(false)
 
-    if (total === 0) return
+  useFrame(() => {
+    if (reportedFirstFrameRef.current || active || total === 0) return
+    reportedFirstFrameRef.current = true
+    onFirstFrame()
+  })
 
-    const elapsed = performance.now() - mountedAtRef.current
-    const delay = Math.max(0, MIN_LOADING_SCREEN_MS - elapsed)
-
-    const timer = window.setTimeout(() => {
-      setReadyToEnter(true)
-    }, delay)
-
-    return () => window.clearTimeout(timer)
-  }, [active, dismissed, total])
-
-  const dismiss = useCallback(() => {
-    if (!canDismiss || dismissed) return
-    setDismissed(true)
-  }, [canDismiss, dismissed])
-
-  useEffect(() => {
-    if (!canDismiss || dismissed) return
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        dismiss()
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [canDismiss, dismiss, dismissed])
-
-  if (dismissed) return null
-
-  const roundedProgress = total > 0 ? Math.min(100, Math.round(progress)) : 0
-  const statusLabel = active
-    ? `Loading scene assets ${roundedProgress}%`
-    : canDismiss
-      ? 'Scene ready. Press Enter or click to enter.'
-      : 'Preparing scene'
-
-  return (
-    <div
-      className={`loading-screen${canDismiss ? ' loading-screen-ready' : ''}`}
-      aria-live="polite"
-      aria-label={statusLabel}
-      onClick={canDismiss ? dismiss : undefined}
-    >
-      <div className="loading-panel">
-        <p className="loading-eyebrow">gavinzhu.com</p>
-        <pre className="loading-ascii loading-ascii-name" aria-hidden="true">{NAME_ASCII}</pre>
-        <div className="loading-terminal-line">
-          <span className="loading-prompt">boot</span>
-          <span className="loading-status-text">
-            {active ? 'hydrating desk scene and terminal shell' : 'scene staged and waiting'}
-          </span>
-        </div>
-        <div className="loading-bar" aria-hidden="true">
-          <div
-            className="loading-bar-fill"
-            style={{ transform: `scaleX(${Math.max(0.08, roundedProgress / 100)})` }}
-          />
-        </div>
-        <p className="loading-meta">
-          {active
-            ? `${loaded}/${total || '?'} assets • ${roundedProgress}%`
-            : 'Click anywhere or press Enter to enter'}
-        </p>
-        <a href="/blog" className="loading-blog-link" onClick={(e) => e.stopPropagation()}>
-          or go straight to my blog → /blog
-        </a>
-      </div>
-    </div>
-  )
+  return null
 }
 
 type Phase = 'explore' | 'zooming' | 'focused' | 'menu' | 'tank-zooming' | 'tank-view' | 'couch-zooming' | 'couch-view' | 'couch-menu' | 'psp-zooming' | 'psp-view' | 'n3ds-zooming' | 'n3ds-view'
 
-export default function Scene3D() {
+interface Scene3DProps {
+  onLoadStateChange: (state: SceneLoadState) => void
+  onFirstFrame: () => void
+}
+
+export default function Scene3D({
+  onLoadStateChange,
+  onFirstFrame,
+}: Scene3DProps) {
   const [phase, setPhase] = useState<Phase>('explore')
   const [adaptiveFov, setAdaptiveFov] = useState(BASE_FOV)
   const [galleryRequested, setGalleryRequested] = useState(false)
@@ -622,7 +543,7 @@ export default function Scene3D() {
 
   return (
     <div className="scene-container">
-      <LoadingOverlay />
+      <SceneLoadStateReporter onLoadStateChange={onLoadStateChange} />
 
       <main className="sr-only">
         <h1>Gavin Zhu (Guanjia Zhu)</h1>
@@ -781,6 +702,7 @@ export default function Scene3D() {
           on3DSZoomIn={handle3DSZoomInComplete}
           on3DSZoomOut={handle3DSZoomOutComplete}
         />
+        <FirstFrameReporter onFirstFrame={onFirstFrame} />
       </Canvas>
 
       {/* Action buttons */}
