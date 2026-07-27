@@ -2,10 +2,10 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 
-const MODEL_PATH = '/models/siege_tank.glb?v=f530a876'
 const MODEL_SCALE = 3.0
 
 interface SiegeTankModelProps {
+  modelPath: string
   position?: [number, number, number]
   rotation?: [number, number, number]
   shouldSiege?: boolean
@@ -13,13 +13,14 @@ interface SiegeTankModelProps {
 }
 
 export default function SiegeTankModel({
+  modelPath,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   shouldSiege = false,
   onBoundsReady,
 }: SiegeTankModelProps) {
   const group = useRef<THREE.Group>(null)
-  const { scene, animations } = useGLTF(MODEL_PATH)
+  const { scene, animations } = useGLTF(modelPath)
   const { actions } = useAnimations(animations, group)
   const siegeState = useRef<'tank' | 'sieged'>('tank')
   const boundsReported = useRef(false)

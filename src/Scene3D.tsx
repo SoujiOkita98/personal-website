@@ -11,6 +11,7 @@ import PlantModel from './components/PlantModel'
 import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
 import CouchScene from './components/CouchScene'
 import type { SceneLoadState } from './components/SceneLoadingOverlay'
+import type { SceneAssetUrls } from './sceneAssets'
 import './scene.css'
 
 // MacBook position relative to desk group
@@ -275,11 +276,13 @@ function FirstFrameReporter({ onFirstFrame }: { onFirstFrame: () => void }) {
 type Phase = 'explore' | 'zooming' | 'focused' | 'menu' | 'tank-zooming' | 'tank-view' | 'couch-zooming' | 'couch-view' | 'couch-menu' | 'psp-zooming' | 'psp-view' | 'n3ds-zooming' | 'n3ds-view'
 
 interface Scene3DProps {
+  assetUrls: SceneAssetUrls
   onLoadStateChange: (state: SceneLoadState) => void
   onFirstFrame: () => void
 }
 
 export default function Scene3D({
+  assetUrls,
   onLoadStateChange,
   onFirstFrame,
 }: Scene3DProps) {
@@ -615,9 +618,11 @@ export default function Scene3D({
         <group position={[0, 0, -1.6]}>
           <DeskSetup />
           <MacBookModel
+            modelPath={assetUrls.macbook}
             position={MACBOOK_POS}
             screenPortal={screenPortalRef}
             phase={phase}
+            wallpaperPath={assetUrls.wallpaper}
           />
           <PlantModel position={[0.6, 0.74, -0.15]} />
           <CoffeeMug position={[-0.55, 0.74, 0.1]} />
@@ -626,6 +631,7 @@ export default function Scene3D({
         </group>
 
         <SiegeTankModel
+          modelPath={assetUrls.tank}
           position={TANK_POSITION}
           rotation={TANK_ROTATION}
           shouldSiege={phase === 'tank-view'}
@@ -639,11 +645,13 @@ export default function Scene3D({
         />
 
         <CouchScene
+          nintendo3DSModelPath={assetUrls.nintendo3DS}
           position={COUCH_POSITION}
           rotation={COUCH_ROTATION}
           onBoundsReady={handleCouchBounds}
           onPSPBoundsReady={handlePSPBounds}
           on3DSBoundsReady={handle3DSBounds}
+          pspModelPath={assetUrls.psp}
         />
         <pointLight
           position={[-2.5, 2, 0]}

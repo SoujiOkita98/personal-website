@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useState } from 'react'
 
 import { clearSceneRetryMarker, markSceneRetry } from '../sceneRetry'
+import { useSceneAssetDownload } from '../sceneAssets'
 import SceneLoadingOverlay from './SceneLoadingOverlay'
 import type { SceneLoadState } from './SceneLoadingOverlay'
 
-const Scene3D = lazy(async () => {
+const sceneModulePromise = (async () => {
   try {
     const sceneModule = await import('../Scene3D')
     clearSceneRetryMarker()
@@ -19,7 +20,8 @@ const Scene3D = lazy(async () => {
     }
     throw error
   }
-})
+})()
+const Scene3D = lazy(() => sceneModulePromise)
 
 const INITIAL_LOAD_STATE: SceneLoadState = {
   active: false,
@@ -28,21 +30,30 @@ const INITIAL_LOAD_STATE: SceneLoadState = {
 }
 
 export default function HomeScene() {
+  const { assetUrls, loadedBytes, totalBytes } = useSceneAssetDownload()
   const [loadState, setLoadState] = useState<SceneLoadState>(INITIAL_LOAD_STATE)
   const [firstFrameRendered, setFirstFrameRendered] = useState(false)
   const handleFirstFrame = useCallback(() => setFirstFrameRendered(true), [])
   const sceneReady =
-    firstFrameRendered && loadState.total > 0 && !loadState.active
+    assetUrls !== null && firstFrameRendered && loadState.total > 0 && !loadState.active
 
   return (
     <>
-      <SceneLoadingOverlay loadState={loadState} sceneReady={sceneReady} />
-      <Suspense fallback={null}>
-        <Scene3D
-          onLoadStateChange={setLoadState}
-          onFirstFrame={handleFirstFrame}
-        />
-      </Suspense>
+      <SceneLoadingOverlay
+        downloadComplete={assetUrls !== null}
+        loadedBytes={loadedBytes}
+        totalBytes={totalBytes}
+        sceneReady={sceneReady}
+      />
+      {assetUrls && (
+        <Suspense fallback={null}>
+          <Scene3D
+            assetUrls={assetUrls}
+            onLoadStateChange={setLoadState}
+            onFirstFrame={handleFirstFrame}
+          />
+        </Suspense>
+      )}
     </>
   )
 }

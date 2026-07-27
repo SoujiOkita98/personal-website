@@ -2,22 +2,23 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
-const MODEL_PATH = '/models/sony_psp.glb?v=a9d7013b'
 const MODEL_SCALE = 0.008
 
 interface PSPModelProps {
+  modelPath: string
   position?: [number, number, number]
   rotation?: [number, number, number]
   onBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
 }
 
 export default function PSPModel({
+  modelPath,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   onBoundsReady,
 }: PSPModelProps) {
   const group = useRef<THREE.Group>(null)
-  const { scene } = useGLTF(MODEL_PATH, false, true)
+  const { scene } = useGLTF(modelPath, false, true)
   const boundsReported = useRef(false)
 
   useEffect(() => {
