@@ -29,7 +29,6 @@ const NAME_ASCII = String.raw`
 
 export interface SceneLoadState {
   active: boolean
-  progress: number
   loaded: number
   total: number
 }
@@ -91,12 +90,10 @@ export default function SceneLoadingOverlay({
 
   if (dismissed) return null
 
-  const roundedProgress =
-    loadState.total > 0 ? Math.min(100, Math.round(loadState.progress)) : 0
   const statusLabel = sceneReady
     ? 'Scene ready. Press Enter or click to enter.'
     : loadState.active
-      ? `Loading scene assets ${roundedProgress}%`
+      ? 'Loading complete scene'
       : 'Preparing scene'
 
   return (
@@ -125,14 +122,18 @@ export default function SceneLoadingOverlay({
         </div>
         <div className="loading-bar" aria-hidden="true">
           <div
-            className="loading-bar-fill"
-            style={{ transform: `scaleX(${Math.max(0.08, roundedProgress / 100)})` }}
+            className={[
+              'loading-bar-fill',
+              sceneReady ? 'loading-bar-fill-ready' : 'loading-bar-fill-active',
+            ].join(' ')}
           />
         </div>
         <p className="loading-meta">
           {sceneReady
             ? 'Click anywhere or press Enter to enter'
-            : `${loadState.loaded}/${loadState.total || '?'} assets • ${roundedProgress}%`}
+            : loadState.total > 0
+              ? `Loading complete scene • ${loadState.loaded}/${loadState.total} files`
+              : 'Preparing complete scene'}
         </p>
         <a href="/blog" className="loading-blog-link" onClick={(event) => event.stopPropagation()}>
           or go straight to my blog → /blog

@@ -12,6 +12,17 @@ async function read(relativePath) {
   return readFile(path.join(projectRoot, relativePath), 'utf8')
 }
 
+async function readGlbJson(relativePath) {
+  const buffer = await readFile(path.join(projectRoot, relativePath))
+  assert(
+    buffer.toString('utf8', 0, 4) === 'glTF',
+    `${relativePath} is not a valid binary glTF file.`,
+  )
+
+  const jsonLength = buffer.readUInt32LE(12)
+  return JSON.parse(buffer.toString('utf8', 20, 20 + jsonLength).trim())
+}
+
 const html = await read('dist/index.html')
 const headers = await read('dist/_headers')
 
@@ -98,4 +109,38 @@ for (const modelFile of [
   )
 }
 
-console.log(`First-load verification passed (${criticalBytes} critical JS bytes).`)
+const modelPaths = [
+  'public/models/macbook_pro_m3.glb',
+  'public/models/siege_tank.glb',
+  'public/models/sony_psp.glb',
+  'public/models/nintendo_3ds_xl.glb',
+]
+const modelBytes = (
+  await Promise.all(modelPaths.map(async (modelPath) => (await stat(modelPath)).size))
+).reduce((sum, size) => sum + size, 0)
+
+assert(
+  modelBytes < 8_000_000,
+  `Initial 3D models regressed to ${modelBytes} bytes (limit: 8000000).`,
+)
+
+const macbookGlb = await readGlbJson('public/models/macbook_pro_m3.glb')
+const macbookNodeNames = new Set(macbookGlb.nodes?.map((node) => node.name))
+assert(
+  macbookGlb.extensionsRequired?.includes('EXT_meshopt_compression') &&
+    ['Object_123', 'Object_127', 'Object_129'].every((name) => macbookNodeNames.has(name)),
+  'The compressed MacBook no longer preserves the screen meshes used by the desk experience.',
+)
+
+const tankGlb = await readGlbJson('public/models/siege_tank.glb')
+const tankAnimationNames = new Set(tankGlb.animations?.map((animation) => animation.name))
+assert(
+  tankGlb.extensionsRequired?.includes('EXT_meshopt_compression') &&
+    tankAnimationNames.has('Armature_Stand Work Start_full') &&
+    tankAnimationNames.has('Armature_Stand Work End_full'),
+  'The compressed tank no longer preserves the siege animations.',
+)
+
+console.log(
+  `First-load verification passed (${criticalBytes} critical JS bytes; ${modelBytes} model bytes).`,
+)
