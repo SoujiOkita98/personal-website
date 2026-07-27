@@ -23,7 +23,6 @@ const Scene3D = lazy(async () => {
 
 const INITIAL_LOAD_STATE: SceneLoadState = {
   active: false,
-  progress: 0,
   loaded: 0,
   total: 0,
 }

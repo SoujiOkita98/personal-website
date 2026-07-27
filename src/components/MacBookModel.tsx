@@ -5,7 +5,7 @@ import { useGLTF, Html, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import App from '../App'
 
-const MODEL_PATH = '/models/macbook_pro_m3.glb?v=9e5177f8'
+const MODEL_PATH = '/models/macbook_pro_m3.glb?v=d9963078'
 const WALLPAPER_PATH = '/wallpaper.webp?v=9308238a'
 
 interface MacBookModelProps {

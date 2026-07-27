@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 
-const MODEL_PATH = '/models/siege_tank.glb?v=3f0a0019'
+const MODEL_PATH = '/models/siege_tank.glb?v=f530a876'
 const MODEL_SCALE = 3.0
 
 interface SiegeTankModelProps {

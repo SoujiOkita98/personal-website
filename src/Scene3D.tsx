@@ -250,11 +250,11 @@ function SceneLoadStateReporter({
 }: {
   onLoadStateChange: (state: SceneLoadState) => void
 }) {
-  const { active, progress, loaded, total } = useProgress()
+  const { active, loaded, total } = useProgress()
 
   useEffect(() => {
-    onLoadStateChange({ active, progress, loaded, total })
-  }, [active, loaded, onLoadStateChange, progress, total])
+    onLoadStateChange({ active, loaded, total })
+  }, [active, loaded, onLoadStateChange, total])
 
   return null
 }
