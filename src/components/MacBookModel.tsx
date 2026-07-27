@@ -5,13 +5,12 @@ import { useGLTF, Html, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import App from '../App'
 
-const MODEL_PATH = '/models/macbook_pro_m3.glb?v=d9963078'
-const WALLPAPER_PATH = '/wallpaper.webp?v=9308238a'
-
 interface MacBookModelProps {
+  modelPath: string
   position?: [number, number, number]
   screenPortal?: RefObject<HTMLDivElement | null>
   phase?: string
+  wallpaperPath: string
 }
 
 // Scale: model is ~35.5 units wide, we want ~0.70 scene units
@@ -21,11 +20,13 @@ const MODEL_SCALE = 0.02
 const SCREEN_HOLE_MESHES = new Set(['Object_123', 'Object_129'])
 
 export default function MacBookModel({
+  modelPath,
   position = [0, 0, 0],
   screenPortal,
   phase = 'explore',
+  wallpaperPath,
 }: MacBookModelProps) {
-  const { scene } = useGLTF(MODEL_PATH)
+  const { scene } = useGLTF(modelPath)
   const groupRef = useRef<THREE.Group>(null)
   const { camera, size } = useThree()
 
@@ -38,7 +39,7 @@ export default function MacBookModel({
   const holeMat = useRef(new THREE.MeshBasicMaterial({ colorWrite: false }))
 
   // Load wallpaper texture for the static screen preview
-  const wallpaperTex = useTexture(WALLPAPER_PATH)
+  const wallpaperTex = useTexture(wallpaperPath)
   const screenPreviewMat = useMemo(() => {
     const screenTexture = wallpaperTex.clone()
     screenTexture.colorSpace = THREE.SRGBColorSpace
@@ -277,9 +278,6 @@ export default function MacBookModel({
     </group>
   )
 }
-
-useGLTF.preload(MODEL_PATH)
-useTexture.preload(WALLPAPER_PATH)
 
 // ── Convex Hull — Andrew's monotone chain, O(n log n) ──
 function convexHull(points: [number, number][]): [number, number][] {

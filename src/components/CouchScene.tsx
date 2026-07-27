@@ -4,11 +4,13 @@ import PSPModel from './PSPModel'
 import Nintendo3DSModel from './Nintendo3DSModel'
 
 interface CouchSceneProps {
+  nintendo3DSModelPath: string
   position?: [number, number, number]
   rotation?: [number, number, number]
   onBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
   onPSPBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
   on3DSBoundsReady?: (center: THREE.Vector3, size: THREE.Vector3) => void
+  pspModelPath: string
 }
 
 // Low-poly couch built from box geometries
@@ -574,11 +576,13 @@ function Rug() {
 }
 
 export default function CouchScene({
+  nintendo3DSModelPath,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   onBoundsReady,
   onPSPBoundsReady,
   on3DSBoundsReady,
+  pspModelPath,
 }: CouchSceneProps) {
   const group = useRef<THREE.Group>(null)
   const boundsReported = useRef(false)
@@ -606,12 +610,14 @@ export default function CouchScene({
       <SideTable position={[1.2, 0, 0.1]} />
       {/* PSP on the side table (left side) */}
       <PSPModel
+        modelPath={pspModelPath}
         position={[1.08, 0.66, 0.1]}
         rotation={[0, -0.5, 0]}
         onBoundsReady={onPSPBoundsReady}
       />
       {/* 3DS on the side table (right side) */}
       <Nintendo3DSModel
+        modelPath={nintendo3DSModelPath}
         position={[1.35, 0.66, 0.1]}
         rotation={[0, -0.3, 0]}
         onBoundsReady={on3DSBoundsReady}

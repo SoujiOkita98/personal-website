@@ -34,12 +34,16 @@ export interface SceneLoadState {
 }
 
 interface SceneLoadingOverlayProps {
-  loadState: SceneLoadState
+  downloadComplete: boolean
+  loadedBytes: number
+  totalBytes: number
   sceneReady: boolean
 }
 
 export default function SceneLoadingOverlay({
-  loadState,
+  downloadComplete,
+  loadedBytes,
+  totalBytes,
   sceneReady,
 }: SceneLoadingOverlayProps) {
   const [readyToEnter, setReadyToEnter] = useState(false)
@@ -90,11 +94,17 @@ export default function SceneLoadingOverlay({
 
   if (dismissed) return null
 
+  const downloadProgress =
+    totalBytes > 0
+      ? Math.min(100, Math.floor((Math.min(loadedBytes, totalBytes) / totalBytes) * 100))
+      : 0
+  const loadedMegabytes = (Math.min(loadedBytes, totalBytes) / 1_000_000).toFixed(1)
+  const totalMegabytes = (totalBytes / 1_000_000).toFixed(1)
   const statusLabel = sceneReady
     ? 'Scene ready. Press Enter or click to enter.'
-    : loadState.active
-      ? 'Loading complete scene'
-      : 'Preparing scene'
+    : downloadComplete
+      ? 'Download complete. Preparing scene.'
+      : `Downloading complete scene ${downloadProgress}%`
 
   return (
     <div
@@ -117,23 +127,34 @@ export default function SceneLoadingOverlay({
         <div className="loading-terminal-line">
           <span className="loading-prompt">boot</span>
           <span className="loading-status-text">
-            {sceneReady ? 'scene staged and waiting' : 'hydrating desk scene and terminal shell'}
+            {sceneReady
+              ? 'scene staged and waiting'
+              : downloadComplete
+                ? 'assembling downloaded models'
+                : 'downloading complete desk and gallery'}
           </span>
         </div>
-        <div className="loading-bar" aria-hidden="true">
+        <div
+          className="loading-bar"
+          role="progressbar"
+          aria-label={downloadComplete ? 'Scene download complete' : 'Scene download progress'}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={downloadComplete ? 100 : downloadProgress}
+        >
           <div
-            className={[
-              'loading-bar-fill',
-              sceneReady ? 'loading-bar-fill-ready' : 'loading-bar-fill-active',
-            ].join(' ')}
+            className="loading-bar-fill"
+            style={{
+              transform: `scaleX(${downloadComplete ? 1 : downloadProgress / 100})`,
+            }}
           />
         </div>
         <p className="loading-meta">
           {sceneReady
             ? 'Click anywhere or press Enter to enter'
-            : loadState.total > 0
-              ? `Loading complete scene • ${loadState.loaded}/${loadState.total} files`
-              : 'Preparing complete scene'}
+            : downloadComplete
+              ? 'Download complete • preparing models'
+              : `${loadedMegabytes} / ${totalMegabytes} MB • ${downloadProgress}%`}
         </p>
         <a href="/blog" className="loading-blog-link" onClick={(event) => event.stopPropagation()}>
           or go straight to my blog → /blog

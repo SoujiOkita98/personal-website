@@ -1,4 +1,5 @@
 import { readFile, stat } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 
 const projectRoot = process.cwd()
@@ -98,6 +99,7 @@ assert(
 )
 
 for (const modelFile of [
+  'src/components/MacBookModel.tsx',
   'src/components/SiegeTankModel.tsx',
   'src/components/PSPModel.tsx',
   'src/components/Nintendo3DSModel.tsx',
@@ -109,38 +111,86 @@ for (const modelFile of [
   )
 }
 
-const modelPaths = [
-  'public/models/macbook_pro_m3.glb',
-  'public/models/siege_tank.glb',
-  'public/models/sony_psp.glb',
-  'public/models/nintendo_3ds_xl.glb',
-]
+const expectedModelSizes = new Map([
+  [
+    'public/models/macbook_pro_m3.glb',
+    {
+      bytes: 9_755_508,
+      sha256: 'd1cd7759d4afe0125211db9dede99e87a8faf89819a188d162c7fedd960d7856',
+    },
+  ],
+  [
+    'public/models/siege_tank.glb',
+    {
+      bytes: 6_668_732,
+      sha256: '9b924eca0438cd6f936102ca0238dbf8d55a5c839123a5a78d2b44f041936c0e',
+    },
+  ],
+  [
+    'public/models/sony_psp.glb',
+    {
+      bytes: 1_684_104,
+      sha256: 'acd11fde90fe5ac09d3358155465d654b1e5ea5f4e493c8126ac804042b68743',
+    },
+  ],
+  [
+    'public/models/nintendo_3ds_xl.glb',
+    {
+      bytes: 602_224,
+      sha256: 'd19e11505851bda921f3f70fb1912029cf81f5a71d02f8aba5a6ead9f6e311da',
+    },
+  ],
+])
 const modelBytes = (
-  await Promise.all(modelPaths.map(async (modelPath) => (await stat(modelPath)).size))
+  await Promise.all(
+    [...expectedModelSizes].map(async ([modelPath, expected]) => {
+      const modelStat = await stat(path.join(projectRoot, modelPath))
+      assert(
+        modelStat.size === expected.bytes,
+        `${modelPath} is incomplete or no longer the approved original (${modelStat.size}/${expected.bytes} bytes).`,
+      )
+      const modelHash = createHash('sha256')
+        .update(await readFile(path.join(projectRoot, modelPath)))
+        .digest('hex')
+      assert(
+        modelHash === expected.sha256,
+        `${modelPath} no longer matches the approved original model.`,
+      )
+      return modelStat.size
+    }),
+  )
 ).reduce((sum, size) => sum + size, 0)
 
 assert(
-  modelBytes < 8_000_000,
-  `Initial 3D models regressed to ${modelBytes} bytes (limit: 8000000).`,
+  modelBytes === 18_710_568,
+  `The complete original model set has an unexpected size (${modelBytes} bytes).`,
 )
 
 const macbookGlb = await readGlbJson('public/models/macbook_pro_m3.glb')
 const macbookNodeNames = new Set(macbookGlb.nodes?.map((node) => node.name))
 assert(
-  macbookGlb.extensionsRequired?.includes('EXT_meshopt_compression') &&
+  !macbookGlb.extensionsRequired?.includes('EXT_meshopt_compression') &&
     ['Object_123', 'Object_127', 'Object_129'].every((name) => macbookNodeNames.has(name)),
-  'The compressed MacBook no longer preserves the screen meshes used by the desk experience.',
+  'The original MacBook or its screen meshes are no longer intact.',
 )
 
 const tankGlb = await readGlbJson('public/models/siege_tank.glb')
 const tankAnimationNames = new Set(tankGlb.animations?.map((animation) => animation.name))
 assert(
-  tankGlb.extensionsRequired?.includes('EXT_meshopt_compression') &&
+  !tankGlb.extensionsRequired?.includes('EXT_meshopt_compression') &&
     tankAnimationNames.has('Armature_Stand Work Start_full') &&
     tankAnimationNames.has('Armature_Stand Work End_full'),
-  'The compressed tank no longer preserves the siege animations.',
+  'The original tank or its siege animations are no longer intact.',
+)
+
+const sceneAssetsSource = await read('src/sceneAssets.ts')
+assert(
+  sceneAssetsSource.includes('request.onprogress') &&
+    sceneAssetsSource.includes('URL.createObjectURL(blob)') &&
+    sceneAssetsSource.includes('blob.size !== asset.bytes'),
+  'Scene downloads no longer report real bytes or reject incomplete files.',
 )
 
 console.log(
-  `First-load verification passed (${criticalBytes} critical JS bytes; ${modelBytes} model bytes).`,
+  `First-load verification passed (${criticalBytes} critical JS bytes; ${modelBytes} original model bytes).`,
 )
