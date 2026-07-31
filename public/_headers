@@ -17,6 +17,11 @@
 # The shell must always be checked so it can point at the newest bundles.
 /
   Cache-Control: public, max-age=0, must-revalidate
+  Link: </models/macbook_pro_m3.glb?v=9e5177f8>; rel=preload; as=fetch; type="model/gltf-binary"; crossorigin; fetchpriority=low
+  Link: </models/siege_tank.glb?v=3f0a0019>; rel=preload; as=fetch; type="model/gltf-binary"; crossorigin; fetchpriority=low
+  Link: </models/sony_psp.glb?v=a9d7013b>; rel=preload; as=fetch; type="model/gltf-binary"; crossorigin; fetchpriority=low
+  Link: </models/nintendo_3ds_xl.glb?v=bf977fc5>; rel=preload; as=fetch; type="model/gltf-binary"; crossorigin; fetchpriority=low
+  Link: </wallpaper.webp?v=9308238a>; rel=preload; as=fetch; type="image/webp"; crossorigin
 
 /index.html
   Cache-Control: public, max-age=0, must-revalidate

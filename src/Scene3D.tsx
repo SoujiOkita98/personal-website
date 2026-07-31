@@ -37,7 +37,7 @@ const MOBILE_PORTRAIT_ASPECT = 0.85
 const TANK_POSITION: [number, number, number] = [3, 0, -10]
 const TANK_ROTATION: [number, number, number] = [0, Math.PI * 0.6 - Math.PI / 2, 0]
 
-// Couch scene placement (left of desk, ~9 o'clock)
+// Gaming corner placement (left of desk, ~9 o'clock)
 const COUCH_POSITION: [number, number, number] = [-2.5, 0, 0]
 const COUCH_ROTATION: [number, number, number] = [0, Math.PI * 0.3, 0]
 function getAdaptiveFov(aspect: number) {
@@ -311,13 +311,19 @@ export default function Scene3D({
   }, [])
 
   const handleCouchBounds = useCallback((center: THREE.Vector3, size: THREE.Vector3) => {
-    const maxDim = Math.max(size.x, size.y, size.z)
-    const dist = maxDim * 0.25
-    const target: [number, number, number] = [center.x, center.y + 0.3, center.z]
+    // Frame the complete gaming corner from an elevated three-quarter view.
+    // The previous 0.25x distance cropped the TV, shelf, and PC setup.
+    const horizontalSpan = Math.max(size.x, size.z)
+    const dist = horizontalSpan * 0.95
+    const target: [number, number, number] = [
+      center.x,
+      center.y * 0.45,
+      center.z,
+    ]
     const camPos: [number, number, number] = [
-      center.x + dist * 0.4,
-      center.y + dist * 0.6,
-      center.z + dist * 0.9,
+      center.x + dist * 0.35,
+      center.y + dist * 1.05,
+      center.z + dist * 0.85,
     ]
     couchCamRef.current = { target, camPos }
     const w = window as unknown as Record<string, unknown>
@@ -561,7 +567,7 @@ export default function Scene3D({
         camera={{ fov: adaptiveFov, near: 0.01, far: 100, position: [2.0, 1.8, 1.0] }}
         dpr={[1, 1.5]}
         shadows
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}
@@ -752,7 +758,7 @@ export default function Scene3D({
           <p className="exhibit-desc">
             StarCraft 2 is one of my all-time favorite games. I&apos;m a Terran main, and the Siege Tank
             is hands down my favorite unit — nothing beats that satisfying <em>thunk</em> when it locks
-            into siege mode and starts raining shells. GG no re.
+            into siege mode and starts raining shells. GG.
           </p>
           <span className="exhibit-credit">
             Model by <a href="https://skfb.ly/oXJGR" target="_blank" rel="noopener noreferrer">Catholomew</a> · CC BY-NC 4.0

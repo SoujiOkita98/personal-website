@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import type { RefObject } from 'react'
 import * as THREE from 'three'
 import { useGLTF, Html, useTexture } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber'
 import App from '../App'
 
 interface MacBookModelProps {
@@ -197,46 +197,49 @@ export default function MacBookModel({
     }
   }, [showHtml, screenPreviewMat])
 
-  // ── Per-frame: project glass panel vertices → pixel-perfect clip-path ──
+  // Project the glass panel into a pixel-perfect clip-path only when the
+  // focused screen or viewport changes. The focused camera is locked, so
+  // repeating this geometry work on every rendered frame is unnecessary.
   const lastClip = useRef('')
-  useFrame(() => {
-    if (!screenPortal?.current) return
+  useEffect(() => {
+    const portal = screenPortal?.current
+    if (!portal) return
 
-    // When not showing HTML, clear the clip-path (nothing to clip)
     if (!showHtml) {
       if (lastClip.current !== '') {
-        screenPortal.current.style.clipPath = ''
+        portal.style.clipPath = ''
         lastClip.current = ''
       }
       return
     }
 
-    const verts = screenWorldVerts.current
-    if (!verts.length) return
+    const frame = window.requestAnimationFrame(() => {
+      const verts = screenWorldVerts.current
+      if (!verts.length) return
 
-    // Project every glass-panel vertex to 2D viewport coordinates
-    const projected: [number, number][] = verts.map((v) => {
-      const p = v.clone().project(camera)
-      return [
-        (p.x + 1) / 2 * size.width,
-        (1 - p.y) / 2 * size.height,
-      ]
+      const projected: [number, number][] = verts.map((v) => {
+        const p = v.clone().project(camera)
+        return [
+          ((p.x + 1) / 2) * size.width,
+          ((1 - p.y) / 2) * size.height,
+        ]
+      })
+
+      const hull = convexHull(projected)
+
+      const path = hull
+        .map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)
+        .join(', ')
+
+      const clip = `polygon(${path})`
+      if (clip !== lastClip.current) {
+        portal.style.clipPath = clip
+        lastClip.current = clip
+      }
     })
 
-    // Convex hull → the tightest polygon enclosing the screen
-    const hull = convexHull(projected)
-
-    const path = hull
-      .map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)
-      .join(', ')
-
-    // Only touch the DOM when the value actually changes
-    const clip = `polygon(${path})`
-    if (clip !== lastClip.current) {
-      screenPortal.current.style.clipPath = clip
-      lastClip.current = clip
-    }
-  })
+    return () => window.cancelAnimationFrame(frame)
+  }, [camera, screenPortal, showHtml, size.height, size.width])
   /* eslint-enable react-hooks/immutability */
 
   // Intentionally oversize the Html so it ALWAYS covers the full clip area.
