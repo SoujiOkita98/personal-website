@@ -124,16 +124,6 @@ export default function SceneLoadingOverlay({
         <pre className="loading-ascii loading-ascii-name" aria-hidden="true">
           {NAME_ASCII}
         </pre>
-        <div className="loading-terminal-line">
-          <span className="loading-prompt">boot</span>
-          <span className="loading-status-text">
-            {sceneReady
-              ? 'scene staged and waiting'
-              : downloadComplete
-                ? 'assembling downloaded models'
-                : 'downloading complete desk and gallery'}
-          </span>
-        </div>
         <div
           className="loading-bar"
           role="progressbar"
@@ -156,9 +146,6 @@ export default function SceneLoadingOverlay({
               ? 'Download complete • preparing models'
               : `${loadedMegabytes} / ${totalMegabytes} MB • ${downloadProgress}%`}
         </p>
-        <a href="/blog" className="loading-blog-link" onClick={(event) => event.stopPropagation()}>
-          or go straight to my blog → /blog
-        </a>
       </div>
     </div>
   )

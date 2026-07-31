@@ -35,8 +35,8 @@ assert(
 )
 
 assert(
-  html.includes('name="theme-color" content="#f7f7f4"') &&
-    html.includes('radial-gradient(circle at top, #fff, #f7f7f4 58%, #edede8 100%)'),
+  html.includes('name="theme-color" content="#ffffff"') &&
+    html.includes('background: #fff'),
   'The inline first-frame background no longer matches the existing loading experience.',
 )
 
@@ -87,6 +87,19 @@ assert(
     headers.includes('max-age=0, must-revalidate'),
   'Production cache rules are incomplete.',
 )
+
+for (const preloadUrl of [
+  '/models/macbook_pro_m3.glb?v=9e5177f8',
+  '/models/siege_tank.glb?v=3f0a0019',
+  '/models/sony_psp.glb?v=a9d7013b',
+  '/models/nintendo_3ds_xl.glb?v=bf977fc5',
+  '/wallpaper.webp?v=9308238a',
+]) {
+  assert(
+    headers.includes(`<${preloadUrl}>; rel=preload; as=fetch;`),
+    `${preloadUrl} is no longer preloaded from the home-page response.`,
+  )
+}
 
 const sceneSource = await read('src/Scene3D.tsx')
 const couchSource = await read('src/components/CouchScene.tsx')
