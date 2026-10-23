@@ -1,3 +1,7 @@
+import { lazy, Suspense } from 'react'
+
+const RealtimeInteractiveVideo = lazy(() => import('./RealtimeInteractiveVideo'))
+
 export interface Post {
   slug: string
   date: string
@@ -7,6 +11,17 @@ export interface Post {
 }
 
 export const posts: Post[] = [
+  {
+    slug: 'real-time-interactive-video',
+    date: '2026-10-23',
+    tag: 'research',
+    title: 'Real-Time Interactive Video — Industry Landscape & Research Tracker',
+    body: (
+      <Suspense fallback={<p>Loading research tracker…</p>}>
+        <RealtimeInteractiveVideo />
+      </Suspense>
+    ),
+  },
   {
     slug: 'just-middlemen-and-wrappers',
     date: '2026-05-30',
