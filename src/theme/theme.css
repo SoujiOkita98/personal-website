@@ -11,7 +11,7 @@
   --blog-tag-text: #294d82;
   --blog-success: #226634;
   --blog-selection: #cfdef7;
-  --blog-reading-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --blog-reading-font: 'Geist Pixel Square', monospace;
   --menu-bar-bg: rgba(248, 249, 246, 0.92);
   --menu-bar-text: var(--blog-heading);
   --window-bg: var(--blog-bg);
@@ -53,6 +53,17 @@
 .site-theme ::selection {
   color: var(--blog-heading);
   background: var(--blog-selection);
+}
+
+/* Keep scrolling available without displaying browser scrollbar chrome. */
+.site-theme,
+.site-theme * {
+  scrollbar-width: none;
+}
+
+.site-theme::-webkit-scrollbar,
+.site-theme *::-webkit-scrollbar {
+  display: none;
 }
 
 .site-theme-control {

@@ -177,11 +177,11 @@
 
 .blog-post-title {
   font-size: 25px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--blog-heading);
   margin: 0 0 16px;
   line-height: 1.45;
-  letter-spacing: -0.015em;
+  letter-spacing: 0.02em;
   font-family: var(--blog-reading-font);
   overflow-wrap: anywhere;
 }
@@ -253,7 +253,7 @@
 
 .blog-post-body strong {
   color: var(--blog-heading);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .blog-post-body blockquote {

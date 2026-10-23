@@ -6,7 +6,7 @@
 .research-tracker h3 {
   color: var(--blog-heading);
   font-size: 1.15em;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.6;
   margin: 36px 0 20px;
   scroll-margin-top: 24px;
@@ -15,7 +15,7 @@
 .research-tracker h4 {
   color: var(--blog-heading);
   font-size: 1.05em;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.6;
   margin: 28px 0 14px;
 }
@@ -41,7 +41,7 @@
 
 .research-tracker strong {
   color: var(--blog-heading);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .research-tracker a {
@@ -92,7 +92,7 @@
 
 .research-tracker th {
   color: var(--blog-text);
-  font-weight: 600;
+  font-weight: 500;
   background: var(--blog-surface);
 }
 
