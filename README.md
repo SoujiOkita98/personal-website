@@ -24,12 +24,13 @@ Always run `npm run build` before pushing — it runs `tsc` and will catch type 
 
 ## How it's structured
 
-Two routes, defined in `src/main.tsx`:
+Routes, defined in `src/main.tsx`:
 
 | Route    | Renders                | Notes |
 |----------|------------------------|-------|
 | `/`      | `Scene3D` (the 3D desktop) | Lazy-loaded, so the heavy Three.js bundles only download here |
-| `/blog`  | `src/pages/Blog.tsx`   | Lightweight standalone page — **no 3D engine loads** |
+| `/blog`  | `src/pages/Blog.tsx`   | Titles and excerpts; article bodies render only after selection |
+| `/blog/:slug` | `src/pages/Blog.tsx` | One complete article, with a link back to all posts |
 
 The 3D desktop (`src/App.tsx`) is rendered onto the MacBook screen inside the scene. It hosts:
 - **Terminal** (`src/components/Terminal/`) — typed commands like `about`, `whoami`, `blog`
@@ -46,15 +47,19 @@ There are four doors into the blog, all wired to the same content:
 
 **One source of truth: `src/blog/posts.tsx`.** Both the `/blog` page and the in-desktop
 blog window read from this array, so editing it updates everywhere.
+The blog window also starts with titles and excerpts; selecting a post opens its
+body inside the window. Shared links use `/blog/:slug`. Older `/blog#slug` links
+redirect to the corresponding article.
 
 Add a new object to the **top** of the `posts` array (newest first):
 
 ```tsx
 {
-  slug: 'my-post-slug',          // url-safe; becomes the #anchor and share link
+  slug: 'my-post-slug',          // url-safe; becomes /blog/my-post-slug
   date: '2026-06-04',            // YYYY-MM-DD, shown on the card
   tag: 'ai',                     // short label chip (e.g. 'ai', 'meta')
   title: 'My post title',
+  excerpt: 'A short summary shown in the blog list.',
   body: (
     <>
       <p>First paragraph.</p>

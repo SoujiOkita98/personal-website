@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import { Linkedin, Link2 } from 'lucide-react'
 import { posts } from '../blog/posts'
 import './blog.css'
@@ -18,7 +19,7 @@ function XIcon() {
 function ShareBar({ slug, title }: { slug: string; title: string }) {
   const [copied, setCopied] = useState(false)
 
-  const url = `${window.location.origin}/blog#${slug}`
+  const url = `${window.location.origin}/blog/${slug}`
   const encoded = encodeURIComponent(url)
   const encodedTitle = encodeURIComponent(title)
 
@@ -62,6 +63,12 @@ function ShareBar({ slug, title }: { slug: string; title: string }) {
 }
 
 export default function Blog() {
+  const { slug, '*': unmatchedPath } = useParams()
+  const { hash } = useLocation()
+  const requestedSlug = slug ?? unmatchedPath
+  const post = posts.find((entry) => entry.slug === requestedSlug)
+  const legacyPost = !requestedSlug && posts.find((entry) => hash === `#${entry.slug}`)
+  const contentRef = useRef<HTMLElement>(null)
   const [sizeIdx, setSizeIdx] = useState(() => {
     const saved = localStorage.getItem(LS_KEY)
     const parsed = saved !== null ? parseInt(saved, 10) : DEFAULT_SIZE_IDX
@@ -72,7 +79,21 @@ export default function Blog() {
     localStorage.setItem(LS_KEY, String(sizeIdx))
   }, [sizeIdx])
 
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0 })
+  }, [requestedSlug])
+
+  useEffect(() => {
+    const previousTitle = document.title
+    document.title = post ? `${post.title} | Gavin Zhu` : 'Blog | Gavin Zhu'
+    return () => { document.title = previousTitle }
+  }, [post])
+
   const fontSize = FONT_SIZES[sizeIdx]
+
+  if (legacyPost) {
+    return <Navigate to={`/blog/${legacyPost.slug}`} replace />
+  }
 
   return (
     <div className="blog-page" style={{ '--blog-font-size': `${fontSize}px` } as React.CSSProperties}>
@@ -80,7 +101,7 @@ export default function Blog() {
         <div className="blog-header-left">
           <a href="/" className="blog-site-name">gavinzhu.com</a>
           <span className="blog-separator">/</span>
-          <span className="blog-label">blog</span>
+          <Link to="/blog" className="blog-label">blog</Link>
         </div>
         <div className="blog-header-right">
           <div className="font-size-control">
@@ -98,26 +119,51 @@ export default function Blog() {
               aria-label="Increase font size"
             >A+</button>
           </div>
-          <a href="/" className="blog-back-link">← back to site</a>
+          {requestedSlug ? (
+            <Link to="/blog" className="blog-back-link">← all posts</Link>
+          ) : (
+            <a href="/" className="blog-back-link">← back to site</a>
+          )}
         </div>
       </header>
 
-      <main className="blog-list">
-        <p className="blog-index-title">// writing</p>
-
-        {posts.map((post) => (
-          <article key={post.slug} id={post.slug} className="blog-post-card">
+      <main ref={contentRef} className="blog-list">
+        {post ? (
+          <article id={post.slug} className="blog-post-card">
             <div className="blog-post-meta">
               <span className="blog-post-date">{post.date}</span>
               <span className="blog-post-tag">{post.tag}</span>
             </div>
-            <h2 className="blog-post-title">{post.title}</h2>
+            <h1 className="blog-post-title">{post.title}</h1>
             <div className="blog-post-body">
               {post.body}
             </div>
-            <ShareBar slug={post.slug} title={post.title} />
+            <ShareBar key={post.slug} slug={post.slug} title={post.title} />
+            <Link to="/blog" className="blog-all-posts">← all posts</Link>
           </article>
-        ))}
+        ) : requestedSlug ? (
+          <section>
+            <h1 className="blog-post-title">Article not found</h1>
+            <Link to="/blog" className="blog-read-link">Browse all posts →</Link>
+          </section>
+        ) : (
+          <>
+            <h1 className="blog-index-title">// writing</h1>
+            {posts.map((entry) => (
+              <article key={entry.slug} className="blog-post-card">
+                <div className="blog-post-meta">
+                  <span className="blog-post-date">{entry.date}</span>
+                  <span className="blog-post-tag">{entry.tag}</span>
+                </div>
+                <h2 className="blog-post-title">
+                  <Link to={`/blog/${entry.slug}`} className="blog-post-link">{entry.title}</Link>
+                </h2>
+                <p className="blog-post-excerpt">{entry.excerpt}</p>
+                <Link to={`/blog/${entry.slug}`} className="blog-read-link">Read article →</Link>
+              </article>
+            ))}
+          </>
+        )}
       </main>
     </div>
   )

@@ -7,6 +7,7 @@ export interface Post {
   date: string
   tag: string
   title: string
+  excerpt: string
   body: React.ReactNode
 }
 
@@ -16,6 +17,7 @@ export const posts: Post[] = [
     date: '2026-10-23',
     tag: 'research',
     title: 'Real-Time Interactive Video — Industry Landscape & Research Tracker',
+    excerpt: 'A research snapshot of 56 real-time video products, world models, open-source projects, papers, and benchmarks — with a competitive framework and industry timeline.',
     body: (
       <Suspense fallback={<p>Loading research tracker…</p>}>
         <RealtimeInteractiveVideo />
@@ -27,6 +29,7 @@ export const posts: Post[] = [
     date: '2026-05-30',
     tag: 'ai',
     title: 'Just middlemen and wrappers?',
+    excerpt: 'Why middleware like Render, Railway, and Supabase can compound in the agent era — and become the super-wholesalers of AI infrastructure.',
     body: (
       <>
         <p>"It's just a wrapper" is supposed to be an insult. I don't think it is.</p>
@@ -54,6 +57,7 @@ export const posts: Post[] = [
     date: '2026-04-04',
     tag: 'meta',
     title: 'hello world',
+    excerpt: 'This is my blog. More posts coming.',
     body: (
       <>
         <p>this is my blog. more posts coming.</p>

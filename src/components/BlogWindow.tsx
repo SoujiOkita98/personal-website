@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Linkedin, Link2 } from 'lucide-react'
 import TerminalWindow from './Terminal/TerminalWindow'
 import { posts } from '../blog/posts'
@@ -13,7 +13,7 @@ function XIcon() {
 
 function ShareBar({ slug, title }: { slug: string; title: string }) {
   const [copied, setCopied] = useState(false)
-  const url = `${window.location.origin}/blog#${slug}`
+  const url = `${window.location.origin}/blog/${slug}`
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(url)
@@ -60,30 +60,51 @@ interface BlogWindowProps {
 }
 
 export default function BlogWindow({ onClose, onMinimize }: BlogWindowProps) {
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
+  const selectedPost = posts.find((post) => post.slug === selectedSlug)
+  const bodyRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0 })
+  }, [selectedSlug])
+
   return (
     <TerminalWindow onClose={onClose} onMinimize={onMinimize} title="blog — gavinzhu.com">
-      <div className="bw-body">
+      <div ref={bodyRef} className="bw-body">
         <div className="bw-header">
-          <span className="bw-header-label">// writing</span>
-          <a href="/blog" target="_blank" rel="noopener noreferrer" className="bw-open-link">
+          {selectedPost ? (
+            <button type="button" className="bw-back-link" onClick={() => setSelectedSlug(null)}>← all posts</button>
+          ) : (
+            <span className="bw-header-label">// writing</span>
+          )}
+          <a href={selectedPost ? `/blog/${selectedPost.slug}` : '/blog'} target="_blank" rel="noopener noreferrer" className="bw-open-link">
             open in full ↗
           </a>
         </div>
 
-        {posts.map((post, i) => (
+        {selectedPost ? (
+          <article id={selectedPost.slug} className="bw-post">
+            <div className="bw-post-meta">
+              <span className="bw-post-date">{selectedPost.date}</span>
+              <span className="bw-post-tag">{selectedPost.tag}</span>
+            </div>
+            <h2 className="bw-post-title">{selectedPost.title}</h2>
+            <div className="bw-post-body">
+              {selectedPost.body}
+            </div>
+            <ShareBar key={selectedPost.slug} slug={selectedPost.slug} title={selectedPost.title} />
+          </article>
+        ) : posts.map((post) => (
           <article key={post.slug} className="bw-post">
             <div className="bw-post-meta">
               <span className="bw-post-date">{post.date}</span>
               <span className="bw-post-tag">{post.tag}</span>
             </div>
-            <h2 className="bw-post-title">{post.title}</h2>
-            <div className="bw-post-body">
-              {post.body}
-            </div>
-            <ShareBar slug={post.slug} title={post.title} />
-            {i === posts.length - 1 && (
-              <span className="bw-cursor" aria-hidden="true" />
-            )}
+            <h2 className="bw-post-title">
+              <button type="button" className="bw-post-link" onClick={() => setSelectedSlug(post.slug)}>{post.title}</button>
+            </h2>
+            <div className="bw-post-body"><p>{post.excerpt}</p></div>
+            <button type="button" className="bw-read-link" onClick={() => setSelectedSlug(post.slug)} aria-label={`Read ${post.title}`}>Read article →</button>
           </article>
         ))}
       </div>

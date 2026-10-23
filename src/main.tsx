@@ -19,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
           }
         />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<Blog />} />
         <Route path="/blog/*" element={<Blog />} />
       </Routes>
     </BrowserRouter>

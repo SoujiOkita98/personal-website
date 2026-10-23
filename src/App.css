@@ -576,6 +576,47 @@
   margin-bottom: 0;
 }
 
+.bw-post-link {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.bw-read-link,
+.bw-back-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #aaa;
+  font: inherit;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.bw-read-link {
+  margin-top: 12px;
+}
+
+.bw-post-link:hover,
+.bw-read-link:hover,
+.bw-back-link:hover {
+  color: #eee;
+}
+
+.bw-body :focus-visible {
+  outline: 1px solid #aaa;
+  outline-offset: 4px;
+}
+
 .bw-post:last-child .bw-post-body p:last-child::after {
   content: '';
   display: inline-block;

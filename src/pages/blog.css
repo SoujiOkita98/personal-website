@@ -58,6 +58,7 @@
   font-size: 15px;
   color: #e0e0e0;
   letter-spacing: 0.08em;
+  text-decoration: none;
 }
 
 .blog-header-right {
@@ -131,6 +132,7 @@
 
 .blog-index-title {
   font-size: 11px;
+  font-weight: 400;
   color: #444;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -178,6 +180,47 @@
   line-height: 1.4;
   letter-spacing: 0.02em;
   font-family: 'Geist Pixel Square', monospace;
+  overflow-wrap: anywhere;
+}
+
+.blog-post-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.blog-post-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.blog-post-excerpt {
+  font-size: var(--blog-font-size, 14px);
+  line-height: 1.8;
+  color: #888;
+  margin: 0 0 16px;
+}
+
+.blog-read-link,
+.blog-all-posts {
+  display: inline-block;
+  color: #aaa;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-read-link:hover,
+.blog-all-posts:hover {
+  color: #eee;
+}
+
+.blog-all-posts {
+  margin-top: 28px;
+}
+
+.blog-page :focus-visible {
+  outline: 1px solid #aaa;
+  outline-offset: 4px;
 }
 
 .blog-post-body {
@@ -287,6 +330,8 @@
 @media (max-width: 600px) {
   .blog-header {
     padding: 16px 20px;
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
   .blog-list {
@@ -297,7 +342,4 @@
     font-size: 17px;
   }
 
-  .blog-post-body {
-    font-size: 13px;
-  }
 }
