@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import { Linkedin, Link2 } from 'lucide-react'
 import { posts } from '../blog/posts'
+import BlogThemeControl from '../blog/BlogThemeControl'
+import { useBlogTheme } from '../blog/useBlogTheme'
 import './blog.css'
 
-const FONT_SIZES = [12, 14, 16, 18, 20]
+const FONT_SIZES = [14, 16, 18, 20, 22]
 const DEFAULT_SIZE_IDX = 1
 const LS_KEY = 'blog-font-size-idx'
 
@@ -63,6 +65,7 @@ function ShareBar({ slug, title }: { slug: string; title: string }) {
 }
 
 export default function Blog() {
+  const { preference, setPreference, theme } = useBlogTheme()
   const { slug, '*': unmatchedPath } = useParams()
   const { hash } = useLocation()
   const requestedSlug = slug ?? unmatchedPath
@@ -70,13 +73,23 @@ export default function Blog() {
   const legacyPost = !requestedSlug && posts.find((entry) => hash === `#${entry.slug}`)
   const contentRef = useRef<HTMLElement>(null)
   const [sizeIdx, setSizeIdx] = useState(() => {
-    const saved = localStorage.getItem(LS_KEY)
-    const parsed = saved !== null ? parseInt(saved, 10) : DEFAULT_SIZE_IDX
-    return Math.min(Math.max(parsed, 0), FONT_SIZES.length - 1)
+    try {
+      const saved = localStorage.getItem(LS_KEY)
+      const parsed = saved !== null ? parseInt(saved, 10) : DEFAULT_SIZE_IDX
+      return Number.isFinite(parsed)
+        ? Math.min(Math.max(parsed, 0), FONT_SIZES.length - 1)
+        : DEFAULT_SIZE_IDX
+    } catch {
+      return DEFAULT_SIZE_IDX
+    }
   })
 
   useEffect(() => {
-    localStorage.setItem(LS_KEY, String(sizeIdx))
+    try {
+      localStorage.setItem(LS_KEY, String(sizeIdx))
+    } catch {
+      // Font controls still work when browser storage is restricted.
+    }
   }, [sizeIdx])
 
   useEffect(() => {
@@ -96,7 +109,7 @@ export default function Blog() {
   }
 
   return (
-    <div className="blog-page" style={{ '--blog-font-size': `${fontSize}px` } as React.CSSProperties}>
+    <div className="blog-page blog-theme" data-theme={theme} style={{ '--blog-font-size': `${fontSize}px` } as React.CSSProperties}>
       <header className="blog-header">
         <div className="blog-header-left">
           <a href="/" className="blog-site-name">gavinzhu.com</a>
@@ -104,6 +117,7 @@ export default function Blog() {
           <Link to="/blog" className="blog-label">blog</Link>
         </div>
         <div className="blog-header-right">
+          <BlogThemeControl preference={preference} onChange={setPreference} />
           <div className="font-size-control">
             <button
               className="font-size-btn"

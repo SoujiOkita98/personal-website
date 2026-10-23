@@ -1,0 +1,65 @@
+.blog-theme {
+  --blog-bg: #fafaf8;
+  --blog-surface: #f0f1ed;
+  --blog-heading: #171b24;
+  --blog-text: #343b48;
+  --blog-muted: #606978;
+  --blog-border: #cbd0d8;
+  --blog-link: #174fa6;
+  --blog-link-hover: #103a7b;
+  --blog-tag-bg: #e5ebf5;
+  --blog-tag-text: #294d82;
+  --blog-success: #226634;
+  --blog-selection: #cfdef7;
+  --blog-reading-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+
+.blog-theme[data-theme='dark'] {
+  --blog-bg: #111318;
+  --blog-surface: #1c2027;
+  --blog-heading: #f3f4f6;
+  --blog-text: #d1d5db;
+  --blog-muted: #a6aebc;
+  --blog-border: #394150;
+  --blog-link: #99c2ff;
+  --blog-link-hover: #c4dcff;
+  --blog-tag-bg: #242a35;
+  --blog-tag-text: #c5d4ed;
+  --blog-success: #8de4b5;
+  --blog-selection: #344b70;
+  color-scheme: dark;
+}
+
+.blog-theme ::selection {
+  color: var(--blog-heading);
+  background: var(--blog-selection);
+}
+
+.blog-theme-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 5px 8px;
+  border: 1px solid var(--blog-border);
+  border-radius: 6px;
+  color: var(--blog-text);
+  background: var(--blog-surface);
+  font-family: var(--blog-reading-font);
+  font-size: 13px;
+}
+
+.blog-theme-control select {
+  max-width: 100px;
+  border: 0;
+  color: var(--blog-heading);
+  background: var(--blog-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.blog-theme-control:focus-within {
+  outline: 2px solid var(--blog-link);
+  outline-offset: 3px;
+}

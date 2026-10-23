@@ -4,18 +4,18 @@
 }
 
 .research-tracker h3 {
-  color: #ddd;
+  color: var(--blog-heading);
   font-size: 1.15em;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.6;
   margin: 36px 0 20px;
   scroll-margin-top: 24px;
 }
 
 .research-tracker h4 {
-  color: #c8c8c8;
+  color: var(--blog-heading);
   font-size: 1.05em;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.6;
   margin: 28px 0 14px;
 }
@@ -40,28 +40,28 @@
 }
 
 .research-tracker strong {
-  color: #c8c8c8;
-  font-weight: 500;
+  color: var(--blog-heading);
+  font-weight: 600;
 }
 
 .research-tracker a {
-  color: #a0a0a0;
+  color: var(--blog-link);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .research-tracker a:hover {
-  color: #e0e0e0;
+  color: var(--blog-heading);
 }
 
 .research-tracker hr {
   border: 0;
-  border-top: 1px solid #2a2a2a;
+  border-top: 1px solid var(--blog-border);
   margin: 32px 0;
 }
 
 .research-tracker-toc {
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--blog-border);
   padding: 20px;
   margin: 28px 0;
 }
@@ -84,19 +84,19 @@
 
 .research-tracker th,
 .research-tracker td {
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--blog-border);
   padding: 10px 12px;
   text-align: left;
   vertical-align: top;
 }
 
 .research-tracker th {
-  color: #d4d4d4;
-  font-weight: 500;
-  background: #161616;
+  color: var(--blog-text);
+  font-weight: 600;
+  background: var(--blog-surface);
 }
 
 .research-tracker :focus-visible {
-  outline: 1px solid #aaa;
+  outline: 1px solid var(--blog-link);
   outline-offset: 4px;
 }

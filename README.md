@@ -51,6 +51,10 @@ The blog window also starts with titles and excerpts; selecting a post opens its
 body inside the window. Shared links use `/blog/:slug`. Older `/blog#slug` links
 redirect to the corresponding article.
 
+Both blog views offer System, Light, and Dark themes. The default follows the
+system appearance; a manual selection is remembered locally and synced across
+tabs. Shared colors and reading fonts live in `src/blog/blog-theme.css`.
+
 Add a new object to the **top** of the `posts` array (newest first):
 
 ```tsx

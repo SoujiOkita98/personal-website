@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Linkedin, Link2 } from 'lucide-react'
 import TerminalWindow from './Terminal/TerminalWindow'
 import { posts } from '../blog/posts'
+import BlogThemeControl from '../blog/BlogThemeControl'
+import { useBlogTheme } from '../blog/useBlogTheme'
 
 function XIcon() {
   return (
@@ -60,6 +62,7 @@ interface BlogWindowProps {
 }
 
 export default function BlogWindow({ onClose, onMinimize }: BlogWindowProps) {
+  const { preference, setPreference, theme } = useBlogTheme()
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const selectedPost = posts.find((post) => post.slug === selectedSlug)
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -70,16 +73,19 @@ export default function BlogWindow({ onClose, onMinimize }: BlogWindowProps) {
 
   return (
     <TerminalWindow onClose={onClose} onMinimize={onMinimize} title="blog — gavinzhu.com">
-      <div ref={bodyRef} className="bw-body">
+      <div ref={bodyRef} className="bw-body blog-theme" data-theme={theme}>
         <div className="bw-header">
           {selectedPost ? (
             <button type="button" className="bw-back-link" onClick={() => setSelectedSlug(null)}>← all posts</button>
           ) : (
             <span className="bw-header-label">// writing</span>
           )}
-          <a href={selectedPost ? `/blog/${selectedPost.slug}` : '/blog'} target="_blank" rel="noopener noreferrer" className="bw-open-link">
-            open in full ↗
-          </a>
+          <div className="bw-header-actions">
+            <BlogThemeControl preference={preference} onChange={setPreference} />
+            <a href={selectedPost ? `/blog/${selectedPost.slug}` : '/blog'} target="_blank" rel="noopener noreferrer" className="bw-open-link">
+              open in full ↗
+            </a>
+          </div>
         </div>
 
         {selectedPost ? (
