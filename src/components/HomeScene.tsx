@@ -4,6 +4,8 @@ import { clearSceneRetryMarker, markSceneRetry } from '../sceneRetry'
 import { useSceneAssetDownload } from '../sceneAssets'
 import SceneLoadingOverlay from './SceneLoadingOverlay'
 import type { SceneLoadState } from './SceneLoadingOverlay'
+import { useTheme } from '../theme/useTheme'
+import ThemeControl from '../theme/ThemeControl'
 
 const sceneModulePromise = (async () => {
   try {
@@ -30,6 +32,7 @@ const INITIAL_LOAD_STATE: SceneLoadState = {
 }
 
 export default function HomeScene() {
+  const { preference, setPreference, theme } = useTheme()
   const { assetUrls, loadedBytes, totalBytes } = useSceneAssetDownload()
   const [loadState, setLoadState] = useState<SceneLoadState>(INITIAL_LOAD_STATE)
   const [firstFrameRendered, setFirstFrameRendered] = useState(false)
@@ -39,6 +42,9 @@ export default function HomeScene() {
 
   return (
     <>
+      <div className="home-appearance site-theme" data-theme={theme}>
+        <ThemeControl preference={preference} onChange={setPreference} />
+      </div>
       <SceneLoadingOverlay
         downloadComplete={assetUrls !== null}
         loadedBytes={loadedBytes}

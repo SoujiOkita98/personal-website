@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import '../loading.css'
+import { useTheme } from '../theme/useTheme'
+import TextScramble from './TextScramble'
 
 const MIN_LOADING_SCREEN_MS = 800
 const EXIT_TRANSITION_MS = 240
@@ -46,6 +48,7 @@ export default function SceneLoadingOverlay({
   totalBytes,
   sceneReady,
 }: SceneLoadingOverlayProps) {
+  const { theme } = useTheme()
   const [readyToEnter, setReadyToEnter] = useState(false)
   const [exiting, setExiting] = useState(false)
   const [dismissed, setDismissed] = useState(false)
@@ -82,6 +85,7 @@ export default function SceneLoadingOverlay({
     if (!canDismiss || dismissed) return
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.target instanceof Element && event.target.closest('button, select, input, textarea, a')) return
       if (event.key === 'Enter') {
         event.preventDefault()
         dismiss()
@@ -110,19 +114,21 @@ export default function SceneLoadingOverlay({
     <div
       className={[
         'loading-screen',
+        'site-theme',
         canDismiss ? 'loading-screen-ready' : '',
         exiting ? 'loading-screen-exiting' : '',
       ]
         .filter(Boolean)
         .join(' ')}
       aria-live="polite"
+      data-theme={theme}
       aria-label={statusLabel}
       onClick={canDismiss ? dismiss : undefined}
     >
       <div className="loading-panel">
-        <p className="loading-eyebrow">gavinzhu.com</p>
+        <p className="loading-eyebrow"><TextScramble text="gavinzhu.com" replayKey={theme} /></p>
         <pre className="loading-ascii loading-ascii-name" aria-hidden="true">
-          {NAME_ASCII}
+          <TextScramble text={NAME_ASCII} replayKey={theme} />
         </pre>
         <div
           className="loading-bar"

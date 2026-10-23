@@ -4,7 +4,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  background: #e8e8e8;
+  background: var(--scene-bg);
 }
 
 .scene-container canvas {
@@ -60,9 +60,11 @@
 .enter-button {
   position: relative;
   z-index: 100;
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: var(--scene-panel);
+  border: 1px solid var(--blog-border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  backdrop-filter: blur(12px);
   cursor: pointer;
   transition: transform 0.28s ease, opacity 0.4s ease;
   user-select: none;
@@ -77,12 +79,9 @@
   font-size: clamp(26px, 4.2vw, 44px);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(250, 250, 247, 0.98);
+  color: var(--blog-heading);
   line-height: 1;
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.42),
-    0 3px 0 rgba(86, 86, 86, 0.26),
-    0 9px 18px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
 .enter-button:hover {
@@ -95,7 +94,7 @@
 
 .look-around-button .enter-button-text {
   font-size: clamp(18px, 3.2vw, 30px);
-  color: rgba(250, 250, 247, 0.7);
+  color: var(--blog-text);
 }
 
 .blog-nav-button {
@@ -146,8 +145,8 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(0, 0, 0, 0.35);
+  color: var(--blog-heading);
+  background: var(--scene-panel);
   border: none;
   border-radius: 20px;
   backdrop-filter: blur(10px);
@@ -157,11 +156,11 @@
 }
 
 .back-button:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--blog-surface);
 }
 
 .back-button:active {
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--blog-surface);
   transform: scale(0.95);
 }
 
@@ -173,7 +172,7 @@
   z-index: 100;
   max-width: 320px;
   padding: 20px 22px 16px;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--scene-panel);
   border-radius: 16px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -192,7 +191,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--blog-heading);
 }
 
 .exhibit-desc {
@@ -200,29 +199,29 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--blog-text);
 }
 
 .exhibit-desc em {
   font-style: italic;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--blog-heading);
 }
 
 .exhibit-credit {
   display: block;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--blog-muted);
 }
 
 .exhibit-credit a {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--blog-link);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .exhibit-credit a:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--blog-link-hover);
   text-decoration: underline;
 }
 

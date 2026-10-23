@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import { Linkedin, Link2 } from 'lucide-react'
 import { posts } from '../blog/posts'
-import BlogThemeControl from '../blog/BlogThemeControl'
-import { useBlogTheme } from '../blog/useBlogTheme'
+import ThemeControl from '../theme/ThemeControl'
+import { useTheme } from '../theme/useTheme'
+import TextScramble from '../components/TextScramble'
 import './blog.css'
 
 const FONT_SIZES = [14, 16, 18, 20, 22]
@@ -65,7 +66,7 @@ function ShareBar({ slug, title }: { slug: string; title: string }) {
 }
 
 export default function Blog() {
-  const { preference, setPreference, theme } = useBlogTheme()
+  const { preference, setPreference, theme } = useTheme()
   const { slug, '*': unmatchedPath } = useParams()
   const { hash } = useLocation()
   const requestedSlug = slug ?? unmatchedPath
@@ -109,15 +110,15 @@ export default function Blog() {
   }
 
   return (
-    <div className="blog-page blog-theme" data-theme={theme} style={{ '--blog-font-size': `${fontSize}px` } as React.CSSProperties}>
+    <div className="blog-page site-theme" data-theme={theme} style={{ '--blog-font-size': `${fontSize}px` } as React.CSSProperties}>
       <header className="blog-header">
         <div className="blog-header-left">
-          <a href="/" className="blog-site-name">gavinzhu.com</a>
+          <a href="/" className="blog-site-name"><TextScramble text="gavinzhu.com" replayKey={theme} /></a>
           <span className="blog-separator">/</span>
           <Link to="/blog" className="blog-label">blog</Link>
         </div>
         <div className="blog-header-right">
-          <BlogThemeControl preference={preference} onChange={setPreference} />
+          <ThemeControl preference={preference} onChange={setPreference} />
           <div className="font-size-control">
             <button
               className="font-size-btn"
@@ -148,7 +149,7 @@ export default function Blog() {
               <span className="blog-post-date">{post.date}</span>
               <span className="blog-post-tag">{post.tag}</span>
             </div>
-            <h1 className="blog-post-title">{post.title}</h1>
+            <h1 className="blog-post-title"><TextScramble text={post.title} replayKey={theme} /></h1>
             <div className="blog-post-body">
               {post.body}
             </div>
@@ -170,7 +171,7 @@ export default function Blog() {
                   <span className="blog-post-tag">{entry.tag}</span>
                 </div>
                 <h2 className="blog-post-title">
-                  <Link to={`/blog/${entry.slug}`} className="blog-post-link">{entry.title}</Link>
+                  <Link to={`/blog/${entry.slug}`} className="blog-post-link"><TextScramble text={entry.title} replayKey={theme} /></Link>
                 </h2>
                 <p className="blog-post-excerpt">{entry.excerpt}</p>
                 <Link to={`/blog/${entry.slug}`} className="blog-read-link">Read article →</Link>

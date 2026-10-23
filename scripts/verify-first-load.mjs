@@ -40,6 +40,13 @@ assert(
   'The inline first-frame background no longer matches the existing loading experience.',
 )
 
+assert(
+  html.includes('html[data-theme="dark"]') &&
+    html.includes("localStorage.getItem('blog-color-theme')") &&
+    html.includes("document.documentElement.dataset.theme"),
+  'The saved appearance is no longer applied before the app starts.',
+)
+
 const stylesheetMatch = html.match(
   /<link rel="stylesheet" crossorigin href="([^"]+)"/,
 )

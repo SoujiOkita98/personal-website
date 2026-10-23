@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import { executeCommand } from './commands';
+import TextScramble from '../TextScramble';
 
 interface HistoryEntry {
   command: string;
@@ -11,11 +12,12 @@ const WELCOME = `Welcome to guanjiazhu's terminal. Type 'help' to get started.`;
 const PROMPT = 'guanjiazhu@web ~ % ';
 
 interface TerminalBodyProps {
+  theme?: 'light' | 'dark';
   onOpenBlog?: () => void;
   onOpenZiwei?: () => void;
 }
 
-export default function TerminalBody({ onOpenBlog, onOpenZiwei }: TerminalBodyProps) {
+export default function TerminalBody({ onOpenBlog, onOpenZiwei, theme = 'light' }: TerminalBodyProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [input, setInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
@@ -156,7 +158,7 @@ export default function TerminalBody({ onOpenBlog, onOpenZiwei }: TerminalBodyPr
     <div className="terminal-body" ref={bodyRef} onClick={focusInput} onWheel={handleWheel}>
       {showWelcome && (
         <div className="terminal-output welcome-text">
-          <pre>{WELCOME}</pre>
+          <pre><TextScramble text={WELCOME} replayKey={theme} /></pre>
         </div>
       )}
 

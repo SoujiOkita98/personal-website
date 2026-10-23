@@ -6,6 +6,8 @@ import gsap from 'gsap'
 import MacBookModel from './components/MacBookModel'
 import SiegeTankModel from './components/SiegeTankModel'
 import StudioEnvironment from './components/StudioEnvironment'
+import { useTheme } from './theme/useTheme'
+import TextScramble from './components/TextScramble'
 import DeskSetup from './components/DeskSetup'
 import PlantModel from './components/PlantModel'
 import { CoffeeMug, BookStack, StationWagon } from './components/DeskProps'
@@ -286,6 +288,8 @@ export default function Scene3D({
   onLoadStateChange,
   onFirstFrame,
 }: Scene3DProps) {
+  const { theme } = useTheme()
+  const dark = theme === 'dark'
   const [phase, setPhase] = useState<Phase>('explore')
   const [adaptiveFov, setAdaptiveFov] = useState(BASE_FOV)
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null)
@@ -519,6 +523,7 @@ export default function Scene3D({
   // ESC key listener
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof Element && e.target.closest('select')) return
       if (e.key === 'Escape') {
         if (phase === 'focused') handleExit()
         else if (phase === 'tank-view') handleTankExit()
@@ -534,7 +539,7 @@ export default function Scene3D({
   }, [handleExit, handleTankExit, handleCouchExit, handlePSPExit, handle3DSExit, phase])
 
   return (
-    <div className="scene-container">
+    <div className="scene-container site-theme" data-theme={theme}>
       <SceneLoadStateReporter onLoadStateChange={onLoadStateChange} />
 
       <main className="sr-only">
@@ -574,10 +579,10 @@ export default function Scene3D({
         style={{ zIndex: 1, pointerEvents: phase === 'focused' ? 'none' : 'auto', cursor: (phase === 'tank-view' || phase === 'couch-view' || phase === 'psp-view' || phase === 'n3ds-view') ? 'grab' : undefined }}
       >
         {/* Lighting */}
-        <ambientLight intensity={0.4} color="#ffffff" />
+        <ambientLight intensity={dark ? 0.3 : 0.4} color="#ffffff" />
         <directionalLight
           position={[3, 5, 2]}
-          intensity={1.2}
+          intensity={dark ? 0.8 : 1.2}
           color="#ffffff"
           castShadow
           shadow-mapSize-width={1024}
@@ -618,7 +623,7 @@ export default function Scene3D({
         />
 
         {/* Studio floor */}
-        <StudioEnvironment />
+        <StudioEnvironment dark={dark} />
 
         {/* Desk group */}
         <group position={[0, 0, -1.6]}>
@@ -699,10 +704,10 @@ export default function Scene3D({
       {phase === 'explore' && (
         <div className="action-buttons">
           <button className="enter-button" onClick={handleEnter}>
-            <span className="enter-button-text" data-text="Go to Desk">Go to Desk</span>
+            <span className="enter-button-text" data-text="Go to Desk"><TextScramble text="Go to Desk" replayKey={`${theme}:${phase}`} /></span>
           </button>
           <button className="enter-button look-around-button" onClick={handleLookAround}>
-            <span className="enter-button-text" data-text="Explore Gallery">Explore Gallery</span>
+            <span className="enter-button-text" data-text="Explore Gallery"><TextScramble text="Explore Gallery" replayKey={`${theme}:${phase}`} /></span>
           </button>
 
         </div>
@@ -712,13 +717,13 @@ export default function Scene3D({
       {phase === 'menu' && (
         <div className="action-buttons">
           <button className="enter-button" onClick={() => handleMenuSelect('tank')}>
-            <span className="enter-button-text" data-text="Siege Tank">Siege Tank</span>
+            <span className="enter-button-text" data-text="Siege Tank"><TextScramble text="Siege Tank" replayKey={`${theme}:${phase}`} /></span>
           </button>
           <button className="enter-button" onClick={() => handleMenuSelect('couch')}>
-            <span className="enter-button-text" data-text="Gaming Corner">Gaming Corner</span>
+            <span className="enter-button-text" data-text="Gaming Corner"><TextScramble text="Gaming Corner" replayKey={`${theme}:${phase}`} /></span>
           </button>
           <button className="enter-button look-around-button" onClick={handleMenuBack}>
-            <span className="enter-button-text" data-text="← Back">← Back</span>
+            <span className="enter-button-text" data-text="← Back"><TextScramble text="← Back" replayKey={`${theme}:${phase}`} /></span>
           </button>
         </div>
       )}
@@ -727,10 +732,10 @@ export default function Scene3D({
       {(phase === 'zooming' || phase === 'tank-zooming' || phase === 'couch-zooming') && (
         <div className="action-buttons fade-out">
           <button className="enter-button">
-            <span className="enter-button-text" data-text="Go to Desk">Go to Desk</span>
+            <span className="enter-button-text" data-text="Go to Desk"><TextScramble text="Go to Desk" replayKey={`${theme}:${phase}`} /></span>
           </button>
           <button className="enter-button look-around-button">
-            <span className="enter-button-text" data-text="Explore Gallery">Explore Gallery</span>
+            <span className="enter-button-text" data-text="Explore Gallery"><TextScramble text="Explore Gallery" replayKey={`${theme}:${phase}`} /></span>
           </button>
         </div>
       )}
@@ -770,7 +775,7 @@ export default function Scene3D({
       {phase === 'couch-view' && (
         <div className="action-buttons" style={{ bottom: '6%' }}>
           <button className="enter-button look-around-button" onClick={handleCouchLookAround}>
-            <span className="enter-button-text" data-text="Explore">Explore</span>
+            <span className="enter-button-text" data-text="Explore"><TextScramble text="Explore" replayKey={`${theme}:${phase}`} /></span>
           </button>
         </div>
       )}
@@ -779,13 +784,13 @@ export default function Scene3D({
       {phase === 'couch-menu' && (
         <div className="action-buttons">
           <button className="enter-button" onClick={() => handleCouchMenuSelect('psp')}>
-            <span className="enter-button-text" data-text="Sony PSP">Sony PSP</span>
+            <span className="enter-button-text" data-text="Sony PSP"><TextScramble text="Sony PSP" replayKey={`${theme}:${phase}`} /></span>
           </button>
           <button className="enter-button" onClick={() => handleCouchMenuSelect('n3ds')}>
-            <span className="enter-button-text" data-text="Nintendo 3DS XL">Nintendo 3DS XL</span>
+            <span className="enter-button-text" data-text="Nintendo 3DS XL"><TextScramble text="Nintendo 3DS XL" replayKey={`${theme}:${phase}`} /></span>
           </button>
           <button className="enter-button look-around-button" onClick={handleCouchMenuBack}>
-            <span className="enter-button-text" data-text="← Back">← Back</span>
+            <span className="enter-button-text" data-text="← Back"><TextScramble text="← Back" replayKey={`${theme}:${phase}`} /></span>
           </button>
         </div>
       )}

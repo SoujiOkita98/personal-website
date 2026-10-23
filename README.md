@@ -51,9 +51,16 @@ The blog window also starts with titles and excerpts; selecting a post opens its
 body inside the window. Shared links use `/blog/:slug`. Older `/blog#slug` links
 redirect to the corresponding article.
 
-Both blog views offer System, Light, and Dark themes. The default follows the
-system appearance; a manual selection is remembered locally and synced across
-tabs. Shared colors and reading fonts live in `src/blog/blog-theme.css`.
+System, Light, and Dark themes are shared across the loading screen, 3D room,
+desktop, and blog. The top-right control works before entering the scene. The
+default follows the system appearance; a manual selection is remembered locally
+and synced within the page and across tabs. Existing blog preferences are kept.
+Shared colors and reading fonts live in `src/theme/theme.css`.
+
+Names, headings, and welcome text briefly scramble on entry and theme changes.
+`src/components/TextScramble.tsx` keeps the readable text available to assistive
+technology, reserves its layout, and skips animation for reduced-motion settings.
+Article bodies remain still. No animation package or backend is needed.
 
 Add a new object to the **top** of the `posts` array (newest first):
 

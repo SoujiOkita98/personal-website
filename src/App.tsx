@@ -6,13 +6,15 @@ import TerminalBody from './components/Terminal/TerminalBody'
 import BlogWindow from './components/BlogWindow'
 import Dock from './components/Dock'
 import DesktopIcon from './components/DesktopIcon'
+import { useTheme } from './theme/useTheme'
 
 function App() {
+  const { theme } = useTheme()
   const [terminalOpen, setTerminalOpen] = useState(true)
   const [blogOpen, setBlogOpen] = useState(false)
 
   return (
-    <div className="desktop">
+    <div className="desktop site-theme" data-theme={theme}>
       <MenuBar />
       <div className="desktop-content">
         <div className="desktop-icons">
@@ -50,6 +52,7 @@ function App() {
             onMinimize={() => setTerminalOpen(false)}
           >
             <TerminalBody
+              theme={theme}
               onOpenBlog={() => setBlogOpen(true)}
               onOpenZiwei={() => window.open('https://ziweidoushu-k-line.vercel.app/', '_blank', 'noopener')}
             />

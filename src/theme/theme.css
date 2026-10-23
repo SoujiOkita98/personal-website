@@ -1,4 +1,4 @@
-.blog-theme {
+.site-theme {
   --blog-bg: #fafaf8;
   --blog-surface: #f0f1ed;
   --blog-heading: #171b24;
@@ -12,10 +12,24 @@
   --blog-success: #226634;
   --blog-selection: #cfdef7;
   --blog-reading-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --menu-bar-bg: rgba(248, 249, 246, 0.92);
+  --menu-bar-text: var(--blog-heading);
+  --window-bg: var(--blog-bg);
+  --window-title-bg: var(--blog-surface);
+  --window-border: var(--blog-border);
+  --terminal-text: var(--blog-text);
+  --terminal-prompt: var(--blog-success);
+  --terminal-accent: var(--blog-link);
+  --terminal-dim: var(--blog-muted);
+  --dock-bg: rgba(248, 249, 246, 0.86);
+  --dock-border: var(--blog-border);
+  --desktop-tint: rgba(255, 255, 255, 0.03);
+  --scene-bg: #e8e8e8;
+  --scene-panel: rgba(250, 250, 248, 0.92);
   color-scheme: light;
 }
 
-.blog-theme[data-theme='dark'] {
+.site-theme[data-theme='dark'] {
   --blog-bg: #111318;
   --blog-surface: #1c2027;
   --blog-heading: #f3f4f6;
@@ -28,15 +42,20 @@
   --blog-tag-text: #c5d4ed;
   --blog-success: #8de4b5;
   --blog-selection: #344b70;
+  --menu-bar-bg: rgba(28, 32, 39, 0.92);
+  --dock-bg: rgba(28, 32, 39, 0.86);
+  --desktop-tint: rgba(7, 12, 24, 0.44);
+  --scene-bg: #141922;
+  --scene-panel: rgba(28, 32, 39, 0.92);
   color-scheme: dark;
 }
 
-.blog-theme ::selection {
+.site-theme ::selection {
   color: var(--blog-heading);
   background: var(--blog-selection);
 }
 
-.blog-theme-control {
+.site-theme-control {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -50,7 +69,7 @@
   font-size: 13px;
 }
 
-.blog-theme-control select {
+.site-theme-control select {
   max-width: 100px;
   border: 0;
   color: var(--blog-heading);
@@ -59,7 +78,18 @@
   cursor: pointer;
 }
 
-.blog-theme-control:focus-within {
+.site-theme-control:focus-within {
   outline: 2px solid var(--blog-link);
   outline-offset: 3px;
+}
+
+.home-appearance {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 600;
+}
+
+.home-appearance .site-theme-control {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }

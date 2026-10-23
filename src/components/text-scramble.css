@@ -1,0 +1,38 @@
+.text-scramble {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: bottom;
+  overflow: hidden;
+}
+
+.text-scramble-source {
+  display: block;
+  min-width: 0;
+}
+
+.text-scramble-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.text-scramble[data-scrambling='true'] > .text-scramble-source {
+  opacity: 0;
+}
+
+.text-scramble[data-scrambling='true'] > .text-scramble-layer {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-scramble[data-scrambling='true'] > .text-scramble-source {
+    opacity: 1;
+  }
+
+  .text-scramble[data-scrambling='true'] > .text-scramble-layer {
+    opacity: 0;
+  }
+}
